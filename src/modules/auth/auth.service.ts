@@ -4,6 +4,7 @@ import { Injectable, HttpException } from '@nestjs/common';
 import { User } from '../users/users.entity';
 import { jwtService } from '../jwts/jwts.service';
 import { ERROR } from '../../commons/errorHandling/errorHandling';
+import { SessionsService } from '../sessions/sessions.service';
 
 @Injectable()
 export class AuthService {
@@ -11,6 +12,7 @@ export class AuthService {
         private readonly userService: UserService,
         private readonly JwtService: jwtService,
         private readonly configService: ConfigService,
+        private readonly sessionService: SessionsService
     ) {}
     async register(user: any): Promise<User> {
         try {
@@ -25,10 +27,8 @@ export class AuthService {
         try {
             const user = await this.userService.findUserForLogin(account, password);
             const userId = user.id;
-            const refreshToken = await this.cacheService.get(`users:${userId}:refreshToken`);
-            const accessToken_old = await this.cacheService.get(`users:${userId}:accessToken`);
-            if (accessToken_old) {
-                this.cacheService.del(`users:${userId}:accessToken`);
+            if (!(await this.sessionService.checkActiveSessions(user))) {
+                throw new HttpException('The user is logged in on 4 devices' , 500)
             }
             const accessToken = await this.JwtService.signToken(
                 { id: userId },
@@ -36,64 +36,36 @@ export class AuthService {
                     expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
                 },
             );
-            if (refreshToken) {
-                await this.cacheService.set(
-                    `users:${userId}:accessToken`,
-                    user.role,
-                    this.configService.get<number>('CACHE_ACCESS_TOKEN_TTL'),
-                );
-                return {
-                    accessToken: accessToken,
-                    refreshToken: refreshToken,
-                };
-            }
 
-            const newRefreshToken = await this.JwtService.signToken(
+            const refreshToken = await this.JwtService.signToken(
                 { id: userId },
                 {
                     expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRATION_TIME'),
                 },
             );
-            await this.cacheService.set(
-                `users:${userId}:refreshToken`,
-                newRefreshToken,
-                this.configService.get<number>('CACHE_REFRESH_TOKEN_TTL'),
-            );
-            await this.cacheService.set(
-                `users:${userId}:accessToken`,
-                user.role,
-                this.configService.get<number>('CACHE_ACCESS_TOKEN_TTL'),
-            );
-
+            await this.sessionService.createSession(refreshToken, user)
             return {
                 accessToken: accessToken,
-                refreshToken: newRefreshToken,
+                refreshToken: refreshToken
             };
         } catch (err) {
+            console.log(err)
             throw err;
         }
     }
-    async getNewToken(_refreshToken: string): Promise<any> {
+
+    async getNewToken(refreshToken: string): Promise<any> {
         try {
-            const userId = (await this.JwtService.verifyToken(_refreshToken)).id;
-            const accessToken_old = await this.cacheService.get(`users:${userId}:accessToken`);
-            if (accessToken_old) {
-                this.cacheService.del(`users:${userId}:accessToken`);
+            const userId = (await this.JwtService.verifyToken(refreshToken)).id;
+            const user = await this.userService.getYourInfo(userId);
+            if (!user) {
+                throw new HttpException(ERROR.USER_NOT_FOUND.message, ERROR.USER_NOT_FOUND.statusCode);
             }
             const accessToken = await this.JwtService.signToken(
                 { id: userId },
                 {
                     expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
                 },
-            );
-            const user = await this.userService.getYourInfo(userId);
-            if (!user) {
-                throw new HttpException(ERROR.USER_NOT_FOUND.message, ERROR.USER_NOT_FOUND.statusCode);
-            }
-            await this.cacheService.set(
-                `users:${userId}:accessToken`,
-                user.role,
-                this.configService.get<number>('CACHE_ACCESS_TOKEN_TTL'),
             );
             return {
                 accessToken: accessToken,

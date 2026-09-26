@@ -8,4 +8,4 @@ import { Module } from '@nestjs/common';
     controllers: [],
     exports: [MailSenderService],
 })
-export class SendMailModule {}
+export class MailSenderModule {}

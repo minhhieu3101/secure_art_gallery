@@ -1,9 +1,16 @@
 import { Module } from '@nestjs/common';
-import { UsersController } from './users.controller';
-import { UsersService } from './users.service';
+import { UserController } from './users.controller';
+import { UserService } from './users.service';
+import { MailSenderModule } from '../mail_sender/mail_sender.module';
+import { UserRepository } from './users.repository';
+import { User } from './users.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { jwtModule } from '../jwts/jwts.module';
 
 @Module({
-  controllers: [UsersController],
-  providers: [UsersService]
+    imports: [TypeOrmModule.forFeature([User]), MailSenderModule, jwtModule],
+    providers: [UserService, UserRepository],
+    controllers: [UserController],
+    exports: [UserService, UserRepository],
 })
 export class UsersModule {}

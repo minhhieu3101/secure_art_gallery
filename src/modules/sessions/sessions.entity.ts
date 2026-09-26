@@ -13,8 +13,8 @@ export class Session extends EntityBase {
     @Column()
     expired_at: Date;
 
-    @Column()
-    revoked_at: Date;
+    @Column({ type: 'timestamp', nullable: true })
+    revoked_at: Date | null = null;
 
     @ManyToOne(() => User)
     @JoinColumn({ name: 'fkUserId' })

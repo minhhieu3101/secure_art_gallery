@@ -22,12 +22,6 @@ export class User extends EntityBase {
     @Column()
     fullname: string;
 
-    @Column()
-    phoneNumber: string;
-
-    @Column()
-    dob: Date;
-
     @Exclude()
     @Column({ default: '', length: 4 })
     activeCode: string;
