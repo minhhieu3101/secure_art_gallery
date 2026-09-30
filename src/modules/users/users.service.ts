@@ -7,12 +7,14 @@ import { comparePassword, hashPassword } from '../../utils/encrypt.utils';
 import { Role } from '../../commons/enum/roles.enum';
 import { UserStatus } from '../../commons/enum/users.enum';
 import { Not } from 'typeorm';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class UserService {
     constructor(
         private readonly userRepository: UserRepository,
         private readonly emailService: MailSenderService,
+        private readonly auditService: AuditService,
     ) {}
 
     async createUser(user: any): Promise<User> {
@@ -20,7 +22,9 @@ export class UserService {
         if (!userCheck || userCheck.status === UserStatus.deleted) {
             user.password = await hashPassword(user.password);
             user.activeCode = await this.emailService.sendMail(user.email);
-            return this.userRepository.save(user);
+            const new_user = await this.userRepository.save(user);
+            await this.auditService.appendLog(new_user.id, `CREATE NEW USER ${new_user.username} SUCCESS`)
+            return new_user
         }
         throw new HttpException(ERROR.USERNAME_OR_EMAIL_EXISTED.message, ERROR.USERNAME_OR_EMAIL_EXISTED.statusCode);
     }
@@ -64,6 +68,7 @@ export class UserService {
             }
             user.status = UserStatus.active;
             await this.userRepository.save(user);
+            await this.auditService.appendLog(user.id, `VERIFY USER ${user.username} SUCCESS`)
             return {
                 message: `Verified account ${account} is success `,
             };
@@ -87,7 +92,7 @@ export class UserService {
             user.activeCode = await this.emailService.sendMail(user.email);
             await this.userRepository.save(user);
             return {
-                message: `Change forgot password in account ${email} is success `,
+                message: `Sending OTP to ${email} is success `,
             };
         } catch (err) {
             throw err;
@@ -111,8 +116,9 @@ export class UserService {
             }
             user.password = await hashPassword(password);
             await this.userRepository.save(user);
+            await this.auditService.appendLog(user.id, `CHANGE PASSWORD FOR USER ${user.username} SUCCESS`)
             return {
-                message: `Change forgot password in account ${email} is success `,
+                message: `Change password in account ${email} is success `,
             };
         } catch (err) {
             throw err;
@@ -123,6 +129,19 @@ export class UserService {
         const user = await this.userRepository.getByCondition({
             where: {
                 id: id,
+                status: Not(UserStatus.deleted),
+            },
+        });
+        if (!user) {
+            throw new HttpException(ERROR.USER_NOT_FOUND.message, ERROR.USER_NOT_FOUND.statusCode);
+        }
+        return user;
+    }
+
+    async getbyEmail(email: string): Promise<User> {
+        const user = await this.userRepository.getByCondition({
+            where: {
+                email: email,
                 status: Not(UserStatus.deleted),
             },
         });
@@ -149,6 +168,7 @@ export class UserService {
             user.password = newPassword;
             user.updatedAt = new Date();
             await this.userRepository.save(user);
+            await this.auditService.appendLog(user.id, `CHANGE PASSWORD FOR USER ${user.username} SUCCESS`)
             return {
                 message: `Change password in account is success `,
             };

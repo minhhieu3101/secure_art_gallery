@@ -19,6 +19,7 @@ export class AuthService {
             const newUser = await this.userService.createUser(user);
             return newUser;
         } catch (err) {
+            console.log(err)
             throw err;
         }
     }

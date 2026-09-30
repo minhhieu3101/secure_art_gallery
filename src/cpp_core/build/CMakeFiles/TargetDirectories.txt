@@ -1,0 +1,3 @@
+/Users/Admin/Desktop/Hieu/KSU_study/Secure_programming/secure-art-gallery/src/cpp_core/build/CMakeFiles/audit.dir
+/Users/Admin/Desktop/Hieu/KSU_study/Secure_programming/secure-art-gallery/src/cpp_core/build/CMakeFiles/edit_cache.dir
+/Users/Admin/Desktop/Hieu/KSU_study/Secure_programming/secure-art-gallery/src/cpp_core/build/CMakeFiles/rebuild_cache.dir

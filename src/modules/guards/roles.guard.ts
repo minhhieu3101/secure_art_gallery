@@ -1,20 +1,36 @@
 import { jwtService } from './../jwts/jwts.service';
 import { Role } from '../../commons/enum/roles.enum';
-import { Injectable, CanActivate, ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
+import {
+    Injectable,
+    CanActivate,
+    ExecutionContext,
+    HttpException,
+    HttpStatus,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { UserService } from '../users/users.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-    constructor(private reflector: Reflector, private JwtService: jwtService, private readonly userService: UserService) {}
+    constructor(
+        private reflector: Reflector,
+        private JwtService: jwtService,
+        private readonly userService: UserService,
+    ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const roles = this.reflector.get<Role[]>('roles', context.getHandler());
         const request = context.switchToHttp().getRequest();
         try {
+            const authHeader = request.headers.authorization;
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                throw new UnauthorizedException('Missing or invalid Authorization header');
+            }
             const token = request.headers.authorization.replace('Bearer ', '');
             const userId = await this.JwtService.verifyToken(token);
-            const userRole = await (await this.userService.getYourInfo(userId)).role
+            const user = await this.userService.getYourInfo(userId.id)
+            const userRole = user.role;
             request.userId = userId.id;
             request.userRole = userRole;
             if (roles.length > 0 && !roles.includes(userRole as Role)) {
