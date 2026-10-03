@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { UserService } from '../users/users.service';
+import { SessionsService } from '../sessions/sessions.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -17,6 +18,7 @@ export class RolesGuard implements CanActivate {
         private reflector: Reflector,
         private JwtService: jwtService,
         private readonly userService: UserService,
+        private readonly sessionService: SessionsService,
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -28,11 +30,16 @@ export class RolesGuard implements CanActivate {
                 throw new UnauthorizedException('Missing or invalid Authorization header');
             }
             const token = request.headers.authorization.replace('Bearer ', '');
-            const userId = await this.JwtService.verifyToken(token);
-            const user = await this.userService.getYourInfo(userId.id)
+            const payload = await this.JwtService.verifyToken(token);
+            const session = await this.sessionService.getSessionById(payload.sid);
+            if (!session) {
+                throw new HttpException('This session has expired', 401);
+            }
+            const user = await this.userService.getYourInfo(payload.id);
             const userRole = user.role;
-            request.userId = userId.id;
+            request.userId = payload.id;
             request.userRole = userRole;
+            request.sid = payload.sid
             if (roles.length > 0 && !roles.includes(userRole as Role)) {
                 throw new HttpException(
                     `you are ${userRole} . You do not have permission to do this activity`,
@@ -41,6 +48,7 @@ export class RolesGuard implements CanActivate {
             }
             return true;
         } catch (err) {
+            console.log(err)
             if (err instanceof HttpException && err.getStatus() === HttpStatus.NOT_ACCEPTABLE) {
                 throw err;
             }

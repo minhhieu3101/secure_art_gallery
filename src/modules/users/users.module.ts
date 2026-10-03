@@ -8,9 +8,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { jwtModule } from '../jwts/jwts.module';
 import { AuditModule } from '../audit/audit.module';
 import { ConfigModule } from '@nestjs/config';
+import { SessionsModule } from '../sessions/sessions.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([User]), MailSenderModule, jwtModule, AuditModule, ConfigModule],
+    imports: [TypeOrmModule.forFeature([User]), MailSenderModule, jwtModule, AuditModule, ConfigModule, SessionsModule],
     providers: [UserService, UserRepository],
     controllers: [UserController],
     exports: [UserService, UserRepository],

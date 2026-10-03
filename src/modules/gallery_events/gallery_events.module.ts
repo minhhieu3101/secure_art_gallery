@@ -8,9 +8,10 @@ import { RoomsModule } from '../rooms/rooms.module';
 import { UsersModule } from '../users/users.module';
 import { GalleryEventRepository } from './gallery_events.repository';
 import { jwtModule } from '../jwts/jwts.module';
+import { SessionsModule } from '../sessions/sessions.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([GalleryEvent]), PersonsModule, RoomsModule, UsersModule, jwtModule],
+  imports:[TypeOrmModule.forFeature([GalleryEvent]), PersonsModule, RoomsModule, UsersModule, jwtModule, SessionsModule],
   controllers: [GalleryEventsController],
   providers: [GalleryEventsService, GalleryEventRepository],
   exports:[GalleryEventsService, GalleryEventRepository]

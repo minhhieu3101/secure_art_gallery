@@ -28,4 +28,8 @@ export class PersonService {
     async getPerson(id: string) {
         return await this.personRepository.getById(id);
     }
+
+    async getAllPerson(){
+        return await this.personRepository.getAll()
+    }
 }

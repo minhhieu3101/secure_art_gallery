@@ -1,6 +1,6 @@
 export enum GalleryEventType {
-    ENTRY = 'ENTRY',
-    EXIT = 'EXIT',
-    VISIT = 'VISIT',
-    INCIDENT = 'INCIDENT',
-  }
+    ENTER_GALLERY = 'ENTER_GALLERY',
+    LEAVE_GALLERY = 'LEAVE_GALLERY',
+    ENTER_ROOM = 'ENTER_ROOM',
+    LEAVE_ROOM = 'LEAVE_ROOM',
+}

@@ -18,5 +18,5 @@ export class Session extends EntityBase {
 
     @ManyToOne(() => User)
     @JoinColumn({ name: 'fkUserId' })
-    userId: User;
+    user: User;
 }

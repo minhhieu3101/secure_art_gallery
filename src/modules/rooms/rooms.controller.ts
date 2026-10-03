@@ -1,20 +1,56 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { RoomService } from './rooms.service';
 import { CreateRoomDto } from './dto/createRoom.dto';
 import { Roles } from '../guards/roles.decorator';
 import { Role } from '../../commons/enum/roles.enum';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { RolesGuard } from '../guards/roles.guard';
 
 @Controller('rooms')
 export class RoomsController {
-    constructor(private readonly roomService: RoomService){}
+    constructor(private readonly roomService: RoomService) {}
 
     @Post('createRoom')
     @Roles(Role.admin)
     @UseGuards(RolesGuard)
     @ApiBearerAuth()
     async createRoom(@Body() room: CreateRoomDto): Promise<any> {
-        return await this.roomService.createRoom(Number(room.number));
+        try {
+            return await this.roomService.createRoom(Number(room.number));
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    @Get('room/:id')
+    @Roles()
+    @UseGuards(RolesGuard)
+    @ApiParam({
+        name: 'roomId',
+        format: 'uuid',
+        type: 'string',
+    })
+    @ApiBearerAuth()
+    async getRoom(@Param() id: string): Promise<any> {
+        try {
+            return await this.roomService.getRoom(id);
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    @Get('room')
+    @Roles()
+    @UseGuards(RolesGuard)
+    @ApiBearerAuth()
+    async getAllRoom(): Promise<any> {
+        try {
+            return await this.roomService.getAllRoom();
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     }
 }

@@ -138,16 +138,13 @@ export class UserService {
         return user;
     }
 
-    async getbyEmail(email: string): Promise<User> {
+    async getbyEmail(email: string): Promise<User|null> {
         const user = await this.userRepository.getByCondition({
             where: {
                 email: email,
                 status: Not(UserStatus.deleted),
             },
         });
-        if (!user) {
-            throw new HttpException(ERROR.USER_NOT_FOUND.message, ERROR.USER_NOT_FOUND.statusCode);
-        }
         return user;
     }
 

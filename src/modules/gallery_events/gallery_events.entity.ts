@@ -22,7 +22,7 @@ export class GalleryEvent extends EntityBase {
     person: Person;
 
     // Room where the event happened
-    @ManyToOne(() => Room, { nullable: false, onDelete: 'RESTRICT' })
+    @ManyToOne(() => Room, { nullable: true, onDelete: 'RESTRICT' })
     @JoinColumn()
     room: Room;
     

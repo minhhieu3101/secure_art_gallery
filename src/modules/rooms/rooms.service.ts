@@ -14,4 +14,8 @@ export class RoomService {
     async getRoom(id: string) {
         return await this.roomRepository.getById(id);
     }
+
+    async getAllRoom(){
+        return await this.roomRepository.getAll()
+    }
 }

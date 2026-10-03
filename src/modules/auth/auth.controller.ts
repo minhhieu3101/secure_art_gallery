@@ -1,11 +1,13 @@
-import { Body, ClassSerializerInterceptor, Controller, Post, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Post, UseGuards, UseInterceptors, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CreateAccountDto } from './dto/create_account.dto';
 import { User } from '../users/users.entity';
 import { Role } from '../../commons/enum/roles.enum';
 import { LoginDto } from './dto/login.dto';
-import { refreshTokenDto } from './dto/refreshToken.dto';
+import { Roles } from '../guards/roles.decorator';
+import { RolesGuard } from '../guards/roles.guard';
+import { RefreshDto } from './dto/refresh.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -15,16 +17,47 @@ export class AuthController {
     @UseInterceptors(ClassSerializerInterceptor)
     @ApiQuery({ name: 'role', enum: Role })
     register(@Body() user: CreateAccountDto): Promise<User> {
-        return this.authService.register(user);
+        try {
+            return this.authService.register(user);
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     }
 
     @Post('login')
     login(@Body() userLogin: LoginDto): Promise<any> {
-        return this.authService.login(userLogin.account, userLogin.password);
+        try {
+            return this.authService.login(userLogin.account, userLogin.password);
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     }
 
-    @Post('getToken')
-    getNewToken(@Body() refreshToken: refreshTokenDto): Promise<any> {
-        return this.authService.getNewToken(refreshToken.refreshToken);
+    @Post('refresh')
+    @Roles()
+    @UseGuards(RolesGuard)
+    @ApiBearerAuth()
+    refreshAccessToken(@Req() req: any, @Body() input: RefreshDto){
+        try {
+            return this.authService.refreshAccessToken(req.sid, input.refreshToken);
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    @Post('logout')
+    @Roles()
+    @UseGuards(RolesGuard)
+    @ApiBearerAuth()
+    async logout(@Req() req: any){
+        try {
+            return await this.authService.logout(req.sid)
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     }
 }
