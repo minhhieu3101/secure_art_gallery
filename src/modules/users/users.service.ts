@@ -29,9 +29,9 @@ export class UserService {
         throw new HttpException(ERROR.USERNAME_OR_EMAIL_EXISTED.message, ERROR.USERNAME_OR_EMAIL_EXISTED.statusCode);
     }
 
-    async findUserForLogin(account: string, password: string) {
+    async findUserForLogin(email: string, password: string) {
         const user = await this.userRepository.getByCondition({
-            where: [{ username: account }, { email: account }],
+            where: [{ email: email }],
         });
         if (!user || !(await comparePassword(password, user.password))) {
             throw new HttpException(
@@ -49,10 +49,10 @@ export class UserService {
         return user;
     }
 
-    async verifyUser(account: string, otp: string) {
+    async verifyUser(email: string, otp: string) {
         try {
             const user = await this.userRepository.getByCondition({
-                where: [{ username: account }, { email: account }],
+                where: [{ email: email }],
             });
             if (!user) {
                 throw new HttpException(ERROR.USER_NOT_FOUND.message, ERROR.USER_NOT_FOUND.statusCode);
@@ -70,7 +70,7 @@ export class UserService {
             await this.userRepository.save(user);
             await this.auditService.appendLog(user.id, `VERIFY USER ${user.username} SUCCESS`)
             return {
-                message: `Verified account ${account} is success `,
+                message: `Verified account ${email} is success `,
             };
         } catch (err) {
             throw err;

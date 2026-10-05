@@ -1,4 +1,13 @@
-import { Body, ClassSerializerInterceptor, Controller, Post, UseGuards, UseInterceptors, Req } from '@nestjs/common';
+import {
+    Body,
+    ClassSerializerInterceptor,
+    Controller,
+    Post,
+    UseGuards,
+    UseInterceptors,
+    Req,
+    Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CreateAccountDto } from './dto/create_account.dto';
@@ -8,10 +17,11 @@ import { LoginDto } from './dto/login.dto';
 import { Roles } from '../guards/roles.decorator';
 import { RolesGuard } from '../guards/roles.guard';
 import { RefreshDto } from './dto/refresh.dto';
+import express from 'express';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService){}
+    constructor(private readonly authService: AuthService) {}
 
     @Post('register')
     @UseInterceptors(ClassSerializerInterceptor)
@@ -26,9 +36,25 @@ export class AuthController {
     }
 
     @Post('login')
-    login(@Body() userLogin: LoginDto): Promise<any> {
+    async login(@Body() userLogin: LoginDto, @Res({ passthrough: true }) response: express.Response): Promise<any> {
         try {
-            return this.authService.login(userLogin.account, userLogin.password);
+            const result = await this.authService.login(userLogin.email, userLogin.password);
+            response.cookie('sid', result.sid, {
+                httpOnly: true,
+                secure: false, // localhost
+                sameSite: 'lax',
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            });
+            response.cookie('refreshToken', result.refreshToken, {
+                httpOnly: true,
+                secure: false,
+                sameSite: 'lax',
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+                path: '/auth',
+            });
+            return {
+                accessToken: result.accessToken,
+            };
         } catch (error) {
             console.log(error);
             throw error;
@@ -36,12 +62,11 @@ export class AuthController {
     }
 
     @Post('refresh')
-    @Roles()
-    @UseGuards(RolesGuard)
-    @ApiBearerAuth()
-    refreshAccessToken(@Req() req: any, @Body() input: RefreshDto){
+    async refreshAccessToken(@Req() req: any) {
         try {
-            return this.authService.refreshAccessToken(req.sid, input.refreshToken);
+            const sid = req.cookies?.sid;
+            const refreshToken = req.cookies?.refreshToken;
+            return await this.authService.refreshAccessToken(sid, refreshToken);
         } catch (error) {
             console.log(error);
             throw error;
@@ -52,9 +77,9 @@ export class AuthController {
     @Roles()
     @UseGuards(RolesGuard)
     @ApiBearerAuth()
-    async logout(@Req() req: any){
+    async logout(@Req() req: any) {
         try {
-            return await this.authService.logout(req.sid)
+            return await this.authService.logout(req.sid);
         } catch (error) {
             console.log(error);
             throw error;

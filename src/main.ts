@@ -4,12 +4,18 @@ import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HandleResponseInterceptor } from './commons/interceptors/response.interceptors';
+import cookieParser from "cookie-parser";
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
+    app.use(cookieParser());
     app.useGlobalFilters(new AllExceptionsFilter(app.get(HttpAdapterHost)));
     app.useGlobalPipes(new ValidationPipe());
     app.useGlobalInterceptors(new HandleResponseInterceptor());
+    app.enableCors({
+        origin: 'http://localhost:5173',
+        credentials: true,
+      });
     const config = new DocumentBuilder()
         .addBearerAuth()
         .setTitle('Secure Art Gallery Project')

@@ -30,7 +30,7 @@ export class UserController {
 
     @Post('/user/verify')
     verifyAccount(@Body() info: VerifyUser) {
-        return this.userService.verifyUser(info.account, info.otp);
+        return this.userService.verifyUser(info.email, info.otp);
     }
 
     @Post('/user/sendOTP')

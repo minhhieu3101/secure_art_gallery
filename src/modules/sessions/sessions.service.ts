@@ -48,6 +48,9 @@ export class SessionsService {
                 expired_at: MoreThan(new Date()),
                 revoked_at: IsNull(),
             },
+            relations: {
+                user: true,
+            },
         });
         if (!session) {
             throw new HttpException('Can not find the session', 401);

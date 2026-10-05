@@ -19,14 +19,13 @@ export class AuthService {
             const newUser = await this.userService.createUser(user);
             return newUser;
         } catch (err) {
-            console.log(err)
             throw err;
         }
     }
 
-    async login(account: string, password: string): Promise<any> {
+    async login(email: string, password: string): Promise<any> {
         try {
-            const user = await this.userService.findUserForLogin(account, password);
+            const user = await this.userService.findUserForLogin(email, password);
             const userId = user.id;
             if (!(await this.sessionService.checkActiveSessions(user))) {
                 throw new HttpException('The user is logged in on 4 devices' , 500)
@@ -47,10 +46,10 @@ export class AuthService {
             );
             return {
                 accessToken: accessToken,
-                refreshToken: refreshToken
+                refreshToken: refreshToken,
+                sid: session.id
             };
         } catch (err) {
-            console.log(err)
             throw err;
         }
     }
@@ -87,7 +86,6 @@ export class AuthService {
             session.revoked_at = new Date();
             await session.save()
         } catch (error) {
-            console.log(error)
             throw (error)
         }
     }
