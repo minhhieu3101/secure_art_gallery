@@ -54,6 +54,15 @@ export class UserController {
         return this.userService.getYourInfo(userId);
     }
 
+    @Get('/dashboard/user')
+    @Roles(Role.admin)
+    @UseGuards(RolesGuard)
+    @UseInterceptors(ClassSerializerInterceptor)
+    @ApiBearerAuth()
+    getAllUser() {
+        return this.userService.getAllUser();
+    }
+
     @Patch('/user/change-password')
     @Roles()
     @UseGuards(RolesGuard)
@@ -89,4 +98,33 @@ export class UserController {
     deleteUser(@Param('userId', ParseUUIDPipe) userId: string) {
         return this.userService.deleteUser(userId);
     }
+
+    @Get('/dashboard/log')
+    @Roles(Role.admin)
+    @UseGuards(RolesGuard)
+    @UseInterceptors(ClassSerializerInterceptor)
+    @ApiBearerAuth()
+    async getAllLogs() {
+        try {
+            return await this.userService.getAllLogs();
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    }
+
+    @Get('/dashboard/log/:id')
+    @Roles(Role.admin)
+    @UseGuards(RolesGuard)
+    @UseInterceptors(ClassSerializerInterceptor)
+    @ApiBearerAuth()
+    async getLogByUserID(@Param('id', ParseUUIDPipe) id: string) {
+        try {
+            return await this.userService.getLogbyUserID(id);
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    }
+
 }

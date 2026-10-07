@@ -148,6 +148,10 @@ export class UserService {
         return user;
     }
 
+    async getAllUser(){
+        return await this.userRepository.getAll()
+    }
+
     async changePassword(id: string, password: string, newPassword: string) {
         try {
             const user = await this.userRepository.getByCondition({
@@ -233,5 +237,13 @@ export class UserService {
             console.log(err);
             throw err;
         }
+    }
+
+    async getAllLogs(){
+        return await this.auditService.readAllLogs()
+    }
+
+    async getLogbyUserID(userId: string){
+        return await this.auditService.readLog(userId)
     }
 }

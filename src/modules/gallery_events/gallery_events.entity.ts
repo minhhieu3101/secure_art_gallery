@@ -1,7 +1,6 @@
 import { EntityBase } from '../../commons/database/baseEntity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { GalleryEventType } from '../../commons/enum/events.enum';
-import { Person } from '../persons/persons.entity';
 import { Room } from '../rooms/rooms.entity';
 import { User } from '../users/users.entity';
 
@@ -17,15 +16,18 @@ export class GalleryEvent extends EntityBase {
     event_type: GalleryEventType;
 
     // Person involved in the event
-    @ManyToOne(() => Person, { nullable: false, onDelete: 'RESTRICT' })
-    @JoinColumn()
-    person: Person;
+    @ManyToOne(() => User, {
+        nullable: false,
+        onDelete: 'RESTRICT',
+    })
+    @JoinColumn({ name: 'user_id' })
+    person: User;
 
     // Room where the event happened
     @ManyToOne(() => Room, { nullable: true, onDelete: 'RESTRICT' })
     @JoinColumn()
     room: Room;
-    
+
     @ManyToOne(() => User, { nullable: false, onDelete: 'RESTRICT' })
     @JoinColumn()
     recorded_by: User;

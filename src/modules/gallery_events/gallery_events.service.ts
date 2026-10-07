@@ -1,55 +1,32 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { GalleryEventRepository } from './gallery_events.repository';
-import { Person } from '../persons/persons.entity';
 import { Room } from '../rooms/rooms.entity';
 import { GalleryEventType } from '../../commons/enum/events.enum';
-import { PersonService } from '../persons/persons.service';
 import { UserService } from '../users/users.service';
 import { RoomService } from '../rooms/rooms.service';
+import { AuditService } from '../audit/audit.service';
+import { console } from 'inspector';
 
 @Injectable()
 export class GalleryEventsService {
     constructor(
         private readonly galleryEventRepository: GalleryEventRepository,
-        private readonly personService: PersonService,
         private readonly roomService: RoomService,
         private readonly userService: UserService,
+        private readonly auditService: AuditService,
     ) {}
 
-    async createGalleryEvent(personId: string, roomId: string, employeeId: string, event_type: GalleryEventType) {
+    async enterGallery(email: string, employeeId: string) {
         try {
-            const person = await this.personService.getPerson(personId);
-            if (!person) {
-                throw new HttpException('Can not find person', 400);
-            }
-            const room = await this.roomService.getRoom(roomId);
-            if (!room) {
-                throw new HttpException('Can not find room', 400);
-            }
-            const employee = await this.userService.getYourInfo(employeeId);
-            if (!employee) {
-                throw new HttpException('Can not find employee to record', 400);
-            }
-            await this.galleryEventRepository.save({
-                event_type: event_type,
-                person: person,
-                room: room,
-                recorded_by: employee,
-            });
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async enterGallery(personId: string, employeeId: string) {
-        try {
-            const person = await this.personService.getPerson(personId);
+            const person = await this.userService.getbyEmail(email);
             if (!person) {
                 throw new HttpException('Can not find person', 400);
             }
             const lastEvent = await this.galleryEventRepository.getByCondition({
                 where: {
-                    person: person,
+                    person: {
+                        id: person.id,
+                    },
                 },
                 order: {
                     createdAt: 'DESC',
@@ -67,30 +44,36 @@ export class GalleryEventsService {
             if (!employee) {
                 throw new HttpException('Can not find employee to record', 400);
             }
-            return await this.galleryEventRepository.save({
+            const event = await this.galleryEventRepository.save({
                 event_type: GalleryEventType.ENTER_GALLERY,
                 person: person,
                 recorded_by: employee,
             });
+            await this.auditService.appendLog(person.id, `User ${email} entered the gallery`);
+            return event;
         } catch (error) {
             throw error;
         }
     }
 
-    async leaveGallery(personId: string, employeeId: string) {
+    async leaveGallery(email: string, employeeId: string) {
         try {
-            const person = await this.personService.getPerson(personId);
+            console.log('leaveGallery');
+            const person = await this.userService.getbyEmail(email);
             if (!person) {
                 throw new HttpException('Can not find person', 400);
             }
             const lastEvent = await this.galleryEventRepository.getByCondition({
                 where: {
-                    person: person,
+                    person: {
+                        id: person.id,
+                    },
                 },
                 order: {
                     createdAt: 'DESC',
                 },
             });
+            console.log(lastEvent);
             if (!lastEvent || lastEvent.event_type === GalleryEventType.LEAVE_GALLERY) {
                 throw new HttpException('Person is not inside the gallery', 400);
             }
@@ -102,86 +85,106 @@ export class GalleryEventsService {
             if (!employee) {
                 throw new HttpException('Can not find employee to record', 400);
             }
-            return await this.galleryEventRepository.save({
+            const event = await this.galleryEventRepository.save({
                 event_type: GalleryEventType.LEAVE_GALLERY,
                 person: person,
                 recorded_by: employee,
             });
+            await this.auditService.appendLog(person.id, `User ${email} left the gallery.`);
+            return event;
         } catch (error) {
             throw error;
         }
     }
 
-    async enterRoom(personId: string, roomId: string, employeeId: string){
-        const person = await this.personService.getPerson(personId);
+    async enterRoom(email: string, room_number: number, employeeId: string) {
+        const person = await this.userService.getbyEmail(email);
         if (!person) {
             throw new HttpException('Can not find person', 400);
         }
+        const room: Room = await this.roomService.getRoomByNumber(room_number);
+        if (!room) {
+            throw new HttpException('Can not find the room', 400);
+        }
         const lastEvent = await this.galleryEventRepository.getByCondition({
             where: {
-                person: person,
+                person: {
+                    id: person.id,
+                },
             },
             order: {
                 createdAt: 'DESC',
             },
         });
 
-        if (!lastEvent || lastEvent.event_type === GalleryEventType.LEAVE_GALLERY){
+        if (!lastEvent || lastEvent.event_type === GalleryEventType.LEAVE_GALLERY) {
             throw new HttpException('Person is not inside the gallery', 400);
         }
-        if (lastEvent.event_type === GalleryEventType.ENTER_ROOM){
+        if (lastEvent.event_type === GalleryEventType.ENTER_ROOM) {
             throw new HttpException('Person is already inside the room', 400);
-        }
-        const room = await this.roomService.getRoom(roomId);
-        if (!room) {
-            throw new HttpException('Can not find the room', 400);
         }
         const employee = await this.userService.getYourInfo(employeeId);
         if (!employee) {
             throw new HttpException('Can not find employee to record', 400);
         }
-        return await this.galleryEventRepository.save({
+        const event = await this.galleryEventRepository.save({
             event_type: GalleryEventType.ENTER_ROOM,
             person: person,
             room: room,
             recorded_by: employee,
         });
-        
+        if (room.people == room.occupancy) {
+            await event.remove();
+            throw new HttpException('This room does not have sufficient capacity', 400);
+        }
+        room.people += 1;
+        await room.save();
+        await this.auditService.appendLog(person.id, `User ${email} entered Room ${room_number}.`);
+        return event;
     }
 
-    async leaveRoom(personId: string, roomId: string, employeeId: string){
-        const person = await this.personService.getPerson(personId);
+    async leaveRoom(email: string, room_number: number, employeeId: string) {
+        const person = await this.userService.getbyEmail(email);
         if (!person) {
             throw new HttpException('Can not find person', 400);
         }
+        const room: Room = await this.roomService.getRoomByNumber(room_number);
+        if (!room) {
+            throw new HttpException('Can not find the room', 400);
+        }
         const lastEvent = await this.galleryEventRepository.getByCondition({
             where: {
-                person: person,
+                person: {
+                    id: person.id,
+                },
             },
             order: {
                 createdAt: 'DESC',
             },
         });
 
-        if (!lastEvent || lastEvent.event_type === GalleryEventType.LEAVE_GALLERY){
+        if (!lastEvent || lastEvent.event_type === GalleryEventType.LEAVE_GALLERY) {
             throw new HttpException('Person is not inside the gallery', 400);
         }
-        if (lastEvent.event_type === GalleryEventType.ENTER_GALLERY || lastEvent.event_type === GalleryEventType.LEAVE_ROOM ){
+        if (
+            lastEvent.event_type === GalleryEventType.ENTER_GALLERY ||
+            lastEvent.event_type === GalleryEventType.LEAVE_ROOM
+        ) {
             throw new HttpException('Person is not inside the room', 400);
-        }
-        const room = await this.roomService.getRoom(roomId);
-        if (!room) {
-            throw new HttpException('Can not find the room', 400);
         }
         const employee = await this.userService.getYourInfo(employeeId);
         if (!employee) {
             throw new HttpException('Can not find employee to record', 400);
         }
-        return await this.galleryEventRepository.save({
+        const event = await this.galleryEventRepository.save({
             event_type: GalleryEventType.LEAVE_ROOM,
             person: person,
             room: room,
             recorded_by: employee,
         });
+        room.people -= 1;
+        await room.save();
+        await this.auditService.appendLog(person.id, `User ${email} left Room ${room_number}.`);
+        return event;
     }
 }

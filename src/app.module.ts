@@ -12,7 +12,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { MailSenderModule } from './modules/mail_sender/mail_sender.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { RoomsModule } from './modules/rooms/rooms.module';
-import { PersonsModule } from './modules/persons/persons.module';
 import { GalleryEventsModule } from './modules/gallery_events/gallery_events.module';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
@@ -33,7 +32,6 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
         MailSenderModule,
         AuditModule,
         RoomsModule,
-        PersonsModule,
         GalleryEventsModule
     ],
     controllers: [AppController],

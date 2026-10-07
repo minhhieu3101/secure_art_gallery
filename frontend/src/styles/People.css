@@ -1,0 +1,316 @@
+.people-page {
+    padding: 24px;
+}
+
+/* =========================
+   Header
+========================= */
+
+.people-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.people-header h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.people-header p {
+    margin: 6px 0 0;
+    color: #666;
+    font-size: 14px;
+}
+
+/* =========================
+   Statistics
+========================= */
+
+.people-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.people-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.people-stat-card p {
+    margin: 0 0 4px;
+    color: #666;
+    font-size: 14px;
+}
+
+.people-stat-card h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
+/* Statistic icons */
+
+.people-stat-icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 20px;
+}
+
+.people-stat-icon.blue {
+    background: #e8f0ff;
+}
+
+.people-stat-icon.green {
+    background: #e8f5e9;
+}
+
+.people-stat-icon.orange {
+    background: #fff3e0;
+}
+
+/* =========================
+   People Section
+========================= */
+
+.people-section {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.people-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px;
+    border-bottom: 1px solid #ddd;
+}
+
+.people-section-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.people-section-header span {
+    color: #666;
+    font-size: 14px;
+}
+
+/* =========================
+   Table
+========================= */
+
+.people-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.people-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.people-table th,
+.people-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.people-table th {
+    background: #fafafa;
+    color: #555;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.people-table td {
+    font-size: 14px;
+}
+
+.people-table tbody tr:hover {
+    background: #fafafa;
+}
+
+/* =========================
+   Person
+========================= */
+
+.person-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.person-icon {
+    font-size: 18px;
+}
+
+/* =========================
+   Role
+========================= */
+
+.person-role {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: #eef2f7;
+    color: #374151;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* =========================
+   Status
+========================= */
+
+.person-status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.person-status.active {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.person-status.inactive {
+    background: #ffebee;
+    color: #c62828;
+}
+
+/* =========================
+   Action
+========================= */
+
+.view-person-button {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.view-person-button:hover {
+    background: #f5f5f5;
+}
+
+/* =========================
+   Loading / Error
+========================= */
+
+.people-message {
+    padding: 30px;
+    text-align: center;
+    color: #666;
+}
+
+.people-error {
+    color: #c62828;
+}
+
+/* =========================
+   Empty State
+========================= */
+
+.empty-people {
+    padding: 30px !important;
+    text-align: center !important;
+    color: #777;
+}
+
+/* =========================
+   Tablet
+========================= */
+
+@media (max-width: 900px) {
+    .people-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* =========================
+   Mobile
+========================= */
+
+@media (max-width: 768px) {
+    .people-page {
+        padding: 16px;
+    }
+
+    .people-header {
+        margin-bottom: 20px;
+    }
+
+    .people-header h1 {
+        font-size: 24px;
+    }
+
+    .people-stats {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .people-stat-card {
+        padding: 16px;
+    }
+
+    .people-section-header {
+        padding: 16px;
+    }
+
+    .people-section-header h2 {
+        font-size: 16px;
+    }
+
+    .people-table {
+        min-width: 700px;
+    }
+}
+
+/* =========================
+   Small Mobile
+========================= */
+
+@media (max-width: 480px) {
+    .people-page {
+        padding: 12px;
+    }
+
+    .people-header h1 {
+        font-size: 22px;
+    }
+
+    .people-header p {
+        font-size: 13px;
+    }
+
+    .people-stat-card h2 {
+        font-size: 22px;
+    }
+
+    .people-stat-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 18px;
+    }
+}

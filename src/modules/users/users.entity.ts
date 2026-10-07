@@ -19,14 +19,13 @@ export class User extends EntityBase {
     @Column()
     email: string;
 
-    @Column()
-    fullname: string;
-
     @Exclude()
-    @Column({ default: '', length: 4 })
+    @Column({
+        default: '',
+        length: 4,
+    })
     activeCode: string;
 
-    @Exclude()
     @Column({
         type: 'enum',
         enum: Role,
@@ -34,11 +33,11 @@ export class User extends EntityBase {
     })
     role: Role;
 
+    // Account status
     @Column({
         type: 'enum',
         enum: UserStatus,
         default: UserStatus.inactive,
     })
-    @Exclude()
     status: UserStatus;
 }

@@ -63,6 +63,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       email,
       password,
     });
+    console.log(response)
 
     const newAccessToken = response.accessToken;
 

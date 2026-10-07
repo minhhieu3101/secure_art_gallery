@@ -3,24 +3,27 @@
 
 #include <string>
 #include <vector>
-using namespace std;
 
 struct AuditLog {
-    string auditId;
-    string userId;
-    string action;
-    string createdAt;
+    std::string auditId;
+    std::string userId;
+    std::string action;
+    std::string createdAt;
 };
 
 bool appendLog(
-    const string& connectionString,
-    const string& userId,
-    const string& action
+    const std::string& connectionString,
+    const std::string& userId,
+    const std::string& action
 );
 
-vector<AuditLog> readLog(
-    const string& connectionString,
-    const string& userId
+std::vector<AuditLog> readLog(
+    const std::string& connectionString,
+    const std::string& userId
+);
+
+std::vector<AuditLog> readAllLogs(
+    const std::string& connectionString
 );
 
 #endif

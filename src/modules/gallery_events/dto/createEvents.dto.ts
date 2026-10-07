@@ -1,12 +1,21 @@
-// import { IsEnum } from 'class-validator';
-// import { ApiProperty } from '@nestjs/swagger';
-// import { GalleryEventType } from '../../../commons/enum/events.enum';
+import { IsEmail, IsNotEmpty, IsNumber, IsString, Length } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
-// export class createEventDto {
-//   @ApiProperty({
-//     enum: GalleryEventType,
-//     example: GalleryEventType.ENTRY,
-//   })
-//   @IsEnum(GalleryEventType)
-//   event_type: GalleryEventType;
-// }
+export class EventGalleryDto {
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsEmail()
+    email: string;
+}
+
+export class EventRoomDto {
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsEmail()
+    email: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsNumber()
+    room_number: number;
+}

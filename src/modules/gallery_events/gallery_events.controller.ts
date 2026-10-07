@@ -4,96 +4,59 @@ import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Role } from '../../commons/enum/roles.enum';
 import { Roles } from '../guards/roles.decorator';
 import { RolesGuard } from '../guards/roles.guard';
+import { EventGalleryDto, EventRoomDto } from './dto/createEvents.dto';
 
 @ApiTags('GalleryEvents')
-@Controller('gallery-events')
+@Controller('')
 export class GalleryEventsController {
     constructor(private readonly galleryEventService: GalleryEventsService) {}
 
-    @Post('gallery/enter_gallery/:personId')
+    @Post('events/gallery/enter')
     @Roles(Role.admin, Role.employee)
     @UseGuards(RolesGuard)
-    @ApiParam({
-        name: 'personId',
-        format: 'uuid',
-        type: 'string',
-    })
     @ApiBearerAuth()
-    async enterGallery(@Param('personId', ParseUUIDPipe) personId: string, @Req() req: any) {
+    async enterGallery(@Body() event: EventGalleryDto, @Req() req: any) {
         try {
-            return await this.galleryEventService.enterGallery(personId, req.userId);
+            return await this.galleryEventService.enterGallery(event.email, req.userId);
         } catch (error) {
             console.log(error);
             throw error;
         }
     }
 
-    @Post('gallery/leave_gallery/:personId')
+    @Post('events/gallery/leave')
     @Roles(Role.admin, Role.employee)
     @UseGuards(RolesGuard)
-    @ApiParam({
-        name: 'personId',
-        format: 'uuid',
-        type: 'string',
-    })
     @ApiBearerAuth()
-    async leaveGallery(@Param('personId', ParseUUIDPipe) personId: string, @Req() req: any) {
+    async leaveGallery(@Body() event: EventGalleryDto, @Req() req: any) {
         try {
-            return await this.galleryEventService.leaveGallery(personId, req.userId);
+            return await this.galleryEventService.leaveGallery(event.email, req.userId);
         } catch (error) {
             console.log(error);
             throw error;
         }
     }
 
-    @Post('gallery/enter_room/:roomId/:personId')
+    @Post('events/room/enter')
     @Roles(Role.admin, Role.employee)
     @UseGuards(RolesGuard)
-    @ApiParam({
-        name: 'roomId',
-        format: 'uuid',
-        type: 'string',
-    })
-    @ApiParam({
-        name: 'personId',
-        format: 'uuid',
-        type: 'string',
-    })
     @ApiBearerAuth()
-    async enterRoom(
-        @Param('roomId', ParseUUIDPipe) roomId: string,
-        @Param('personId', ParseUUIDPipe) personId: string,
-        @Req() req: any,
-    ) {
+    async enterRoom(@Body() event: EventRoomDto, @Req() req: any) {
         try {
-            return await this.galleryEventService.enterRoom(personId, roomId, req.userId);
+            return await this.galleryEventService.enterRoom(event.email, event.room_number, req.userId);
         } catch (error) {
             console.log(error);
             throw error;
         }
     }
 
-    @Post('gallery/leave_room/:roomId/:personId')
+    @Post('events/room/leave')
     @Roles(Role.admin, Role.employee)
     @UseGuards(RolesGuard)
-    @ApiParam({
-        name: 'roomId',
-        format: 'uuid',
-        type: 'string',
-    })
-    @ApiParam({
-        name: 'personId',
-        format: 'uuid',
-        type: 'string',
-    })
     @ApiBearerAuth()
-    async leaveRoom(
-        @Param('roomId', ParseUUIDPipe) roomId: string,
-        @Param('personId', ParseUUIDPipe) personId: string,
-        @Req() req: any,
-    ) {
+    async leaveRoom(@Body() event: EventRoomDto, @Req() req: any) {
         try {
-            return await this.galleryEventService.leaveRoom(personId, roomId, req.userId);
+            return await this.galleryEventService.leaveRoom(event.email, event.room_number, req.userId);
         } catch (error) {
             console.log(error);
             throw error;

@@ -15,11 +15,6 @@ function Sidebar() {
           Dashboard
         </NavLink>
 
-        <NavLink to="/gallery">
-          <span>▧</span>
-          Gallery
-        </NavLink>
-
         <NavLink to="/rooms">
           <span>▤</span>
           Rooms

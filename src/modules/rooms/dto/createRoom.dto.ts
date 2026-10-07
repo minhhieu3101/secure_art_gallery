@@ -7,4 +7,9 @@ export class CreateRoomDto {
     @IsString()
     @Length(3)
     number: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsString()
+    occupancy: string;
 }

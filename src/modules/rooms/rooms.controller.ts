@@ -6,17 +6,17 @@ import { Role } from '../../commons/enum/roles.enum';
 import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { RolesGuard } from '../guards/roles.guard';
 
-@Controller('rooms')
+@Controller('')
 export class RoomsController {
     constructor(private readonly roomService: RoomService) {}
 
-    @Post('createRoom')
+    @Post('room/createRoom')
     @Roles(Role.admin)
     @UseGuards(RolesGuard)
     @ApiBearerAuth()
     async createRoom(@Body() room: CreateRoomDto): Promise<any> {
         try {
-            return await this.roomService.createRoom(Number(room.number));
+            return await this.roomService.createRoom(Number(room.number), Number(room.occupancy));
         } catch (error) {
             console.log(error);
             throw error;
@@ -41,13 +41,26 @@ export class RoomsController {
         }
     }
 
-    @Get('room')
+    @Get('dashboard/room')
     @Roles()
     @UseGuards(RolesGuard)
     @ApiBearerAuth()
     async getAllRoom(): Promise<any> {
         try {
             return await this.roomService.getAllRoom();
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    @Get('dashboard/opened_room')
+    @Roles()
+    @UseGuards(RolesGuard)
+    @ApiBearerAuth()
+    async getAllOpenedRoom(): Promise<any> {
+        try {
+            return await this.roomService.getAllOpenedRoom();
         } catch (error) {
             console.log(error);
             throw error;

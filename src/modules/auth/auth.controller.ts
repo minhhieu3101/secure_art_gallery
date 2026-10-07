@@ -52,6 +52,7 @@ export class AuthController {
                 maxAge: 7 * 24 * 60 * 60 * 1000,
                 path: '/auth',
             });
+            console.log(result)
             return {
                 accessToken: result.accessToken,
             };

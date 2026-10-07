@@ -4,11 +4,14 @@
   min-height: 100vh;
 }
 
-.layout-main {
+.main {
   flex: 1;
   min-width: 0;
+  width: auto;
+  max-width: none;
 }
 
-.layout-content {
+.content {
   width: 100%;
+  min-width: 0;
 }

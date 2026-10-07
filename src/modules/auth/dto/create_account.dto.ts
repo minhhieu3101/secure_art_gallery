@@ -18,9 +18,4 @@ export class CreateAccountDto {
     @IsEmail()
     @IsNotEmpty()
     email: string;
-
-    @ApiProperty()
-    @IsString()
-    @IsNotEmpty()
-    fullname: string;
 }
