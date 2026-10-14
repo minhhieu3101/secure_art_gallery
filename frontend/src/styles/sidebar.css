@@ -1,59 +1,197 @@
-.sidebar {
-  width: 220px;
-  min-width: 220px;
-  min-height: 100vh;
-  flex-shrink: 0;
+/* =========================
+   Sidebar
+========================= */
 
-  background: #142b42;
-  color: white;
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 220px;
+    min-width: 220px;
+    height: 100vh;
+    box-sizing: border-box;
+    overflow-y: auto;
+    flex-shrink: 0;
+
+    background: #142b42;
+    color: #ffffff;
+    z-index: 1000;
 }
 
+/* =========================
+     Logo
+  ========================= */
+
 .sidebar-logo {
-  height: 60px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 18px;
-  border-bottom: 1px solid #294057;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 0 18px;
+    border-bottom: 1px solid #294057;
 }
 
 .sidebar-logo-icon {
-  font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+    flex-shrink: 0;
 }
 
 .sidebar-logo span {
-  font-size: 13px;
-  font-weight: 600;
+    color: #ffffff;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    white-space: nowrap;
 }
+
+/* =========================
+     Navigation
+  ========================= */
 
 .sidebar-nav {
-  padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 8px;
 }
 
-.sidebar-nav a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 42px;
-  padding: 0 12px;
-  margin-bottom: 3px;
+.sidebar-nav a,
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 11px;
 
-  color: #d5dde6;
-  text-decoration: none;
-  font-size: 13px;
-  border-radius: 4px;
+    min-height: 44px;
+    padding: 0 12px;
+    margin: 0;
+
+    color: #d5dde6;
+    text-decoration: none;
+
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+    line-height: 1.4;
+
+    border-radius: 5px;
+    box-sizing: border-box;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
 }
 
-.sidebar-nav a span {
-  width: 18px;
-  text-align: center;
+/* Icons */
+
+.sidebar-nav a > span:first-child,
+.sidebar-link-icon {
+    width: 18px;
+    min-width: 18px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1;
+    text-align: center;
 }
 
-.sidebar-nav a:hover {
-  background: #1d3b58;
+/* Hover */
+
+.sidebar-nav a:hover,
+.sidebar-link:hover {
+    background: #1d3b58;
+    color: #ffffff;
 }
 
-.sidebar-nav a.active {
-  background: #1769e0;
-  color: white;
+/* Active page */
+
+.sidebar-nav a.active,
+.sidebar-link.active {
+    background: #1769e0;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+/* Keyboard accessibility */
+
+.sidebar-nav a:focus-visible,
+.sidebar-link:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+}
+
+/* =========================
+     Tablet
+  ========================= */
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
+        min-width: 200px;
+    }
+
+    .sidebar-logo {
+        padding: 0 14px;
+    }
+
+    .sidebar-logo span {
+        font-size: 13px;
+    }
+
+    .sidebar-nav a,
+    .sidebar-link {
+        gap: 9px;
+        padding: 0 10px;
+        font-size: 13px;
+    }
+}
+
+/* =========================
+     Small Mobile
+  ========================= */
+
+@media (max-width: 480px) {
+    .sidebar {
+        width: 68px;
+        min-width: 68px;
+    }
+
+    .sidebar-logo {
+        justify-content: center;
+        padding: 0;
+    }
+
+    .sidebar-logo span {
+        display: none;
+    }
+
+    .sidebar-nav {
+        padding: 12px 6px;
+    }
+
+    .sidebar-nav a,
+    .sidebar-link {
+        justify-content: center;
+        gap: 0;
+        padding: 0;
+    }
+
+    .sidebar-nav a > span:last-child,
+    .sidebar-link > span:last-child {
+        display: none;
+    }
+
+    .sidebar-nav a > span:first-child,
+    .sidebar-link-icon {
+        font-size: 17px;
+    }
 }

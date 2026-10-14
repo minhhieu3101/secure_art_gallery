@@ -1,5 +1,6 @@
 #include <napi.h>
 #include "audit_logic.h"
+#include <stdexcept>
 
 // Wrapper cho appendLog()
 Napi::Value AppendLogWrapped(const Napi::CallbackInfo& info) {
@@ -28,23 +29,17 @@ Napi::Value AppendLogWrapped(const Napi::CallbackInfo& info) {
         info[2].As<Napi::String>().Utf8Value();
 
     try {
-        appendLog(
-            connectionString,
-            userId,
-            action
-        );
+        appendLog(connectionString, userId, action);
 
         return Napi::Boolean::New(env, true);
 
     } catch (const std::exception& e) {
-
         Napi::Error::New(env, e.what())
             .ThrowAsJavaScriptException();
 
         return env.Null();
     }
 }
-
 
 // Wrapper cho readLog()
 Napi::Value ReadLogWrapped(const Napi::CallbackInfo& info) {
@@ -69,38 +64,18 @@ Napi::Value ReadLogWrapped(const Napi::CallbackInfo& info) {
         info[1].As<Napi::String>().Utf8Value();
 
     try {
-        auto logs = readLog(
-            connectionString,
-            userId
-        );
+        auto logs = readLog(connectionString, userId);
 
-        Napi::Array result =
-            Napi::Array::New(env, logs.size());
+        Napi::Array result = Napi::Array::New(env, logs.size());
 
         for (size_t i = 0; i < logs.size(); i++) {
+            Napi::Object item = Napi::Object::New(env);
 
-            Napi::Object item =
-                Napi::Object::New(env);
-
-            item.Set(
-                "auditId",
-                logs[i].auditId
-            );
-
-            item.Set(
-                "userId",
-                logs[i].userId
-            );
-
-            item.Set(
-                "action",
-                logs[i].action
-            );
-
-            item.Set(
-                "createdAt",
-                logs[i].createdAt
-            );
+            item.Set("auditId", logs[i].auditId);
+            item.Set("userId", logs[i].userId);
+            item.Set("email", logs[i].email);
+            item.Set("action", logs[i].action);
+            item.Set("createdAt", logs[i].createdAt);
 
             result.Set(i, item);
         }
@@ -108,7 +83,6 @@ Napi::Value ReadLogWrapped(const Napi::CallbackInfo& info) {
         return result;
 
     } catch (const std::exception& e) {
-
         Napi::Error::New(env, e.what())
             .ThrowAsJavaScriptException();
 
@@ -116,11 +90,8 @@ Napi::Value ReadLogWrapped(const Napi::CallbackInfo& info) {
     }
 }
 
-
 // Wrapper cho readAllLogs()
-Napi::Value ReadAllLogsWrapped(
-    const Napi::CallbackInfo& info
-) {
+Napi::Value ReadAllLogsWrapped(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
 
     if (info.Length() < 1 ||
@@ -138,37 +109,18 @@ Napi::Value ReadAllLogsWrapped(
         info[0].As<Napi::String>().Utf8Value();
 
     try {
-        auto logs = readAllLogs(
-            connectionString
-        );
+        auto logs = readAllLogs(connectionString);
 
-        Napi::Array result =
-            Napi::Array::New(env, logs.size());
+        Napi::Array result = Napi::Array::New(env, logs.size());
 
         for (size_t i = 0; i < logs.size(); i++) {
+            Napi::Object item = Napi::Object::New(env);
 
-            Napi::Object item =
-                Napi::Object::New(env);
-
-            item.Set(
-                "auditId",
-                logs[i].auditId
-            );
-
-            item.Set(
-                "userId",
-                logs[i].userId
-            );
-
-            item.Set(
-                "action",
-                logs[i].action
-            );
-
-            item.Set(
-                "createdAt",
-                logs[i].createdAt
-            );
+            item.Set("auditId", logs[i].auditId);
+            item.Set("userId", logs[i].userId);
+            item.Set("email", logs[i].email);
+            item.Set("action", logs[i].action);
+            item.Set("createdAt", logs[i].createdAt);
 
             result.Set(i, item);
         }
@@ -176,7 +128,6 @@ Napi::Value ReadAllLogsWrapped(
         return result;
 
     } catch (const std::exception& e) {
-
         Napi::Error::New(env, e.what())
             .ThrowAsJavaScriptException();
 
@@ -184,34 +135,21 @@ Napi::Value ReadAllLogsWrapped(
     }
 }
 
-
 // Đăng ký module
-Napi::Object Init(
-    Napi::Env env,
-    Napi::Object exports
-) {
+Napi::Object Init(Napi::Env env, Napi::Object exports) {
     exports.Set(
         "appendLog",
-        Napi::Function::New(
-            env,
-            AppendLogWrapped
-        )
+        Napi::Function::New(env, AppendLogWrapped)
     );
 
     exports.Set(
         "readLog",
-        Napi::Function::New(
-            env,
-            ReadLogWrapped
-        )
+        Napi::Function::New(env, ReadLogWrapped)
     );
 
     exports.Set(
         "readAllLogs",
-        Napi::Function::New(
-            env,
-            ReadAllLogsWrapped
-        )
+        Napi::Function::New(env, ReadAllLogsWrapped)
     );
 
     return exports;

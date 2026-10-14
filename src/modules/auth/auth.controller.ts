@@ -7,6 +7,7 @@ import {
     UseInterceptors,
     Req,
     Res,
+    UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
@@ -52,7 +53,7 @@ export class AuthController {
                 maxAge: 7 * 24 * 60 * 60 * 1000,
                 path: '/auth',
             });
-            console.log(result)
+            console.log(result);
             return {
                 accessToken: result.accessToken,
             };
@@ -63,13 +64,28 @@ export class AuthController {
     }
 
     @Post('refresh')
-    async refreshAccessToken(@Req() req: any) {
+    async refreshAccessToken(@Req() req: any, @Res({ passthrough: true }) response: express.Response) {
         try {
             const sid = req.cookies?.sid;
             const refreshToken = req.cookies?.refreshToken;
+            if (!sid || !refreshToken) {
+                throw new UnauthorizedException('Missing session or refresh token');
+            }
             return await this.authService.refreshAccessToken(sid, refreshToken);
         } catch (error) {
             console.log(error);
+            response.clearCookie('sid', {
+                path: '/login',
+                sameSite: 'lax',
+                secure: false,
+            });
+
+            response.clearCookie('refreshToken', {
+                path: '/login',
+                sameSite: 'lax',
+                secure: false,
+            });
+
             throw error;
         }
     }
@@ -78,11 +94,27 @@ export class AuthController {
     @Roles()
     @UseGuards(RolesGuard)
     @ApiBearerAuth()
-    async logout(@Req() req: any) {
+    async logout(@Req() req: any, @Res({ passthrough: true }) res: express.Response) {
         try {
-            return await this.authService.logout(req.sid);
+            await this.authService.logout(req.sid);
+
+            res.clearCookie('sid', {
+                httpOnly: true,
+                secure: false,
+                sameSite: 'lax',
+                path: '/',
+            });
+
+            res.clearCookie('refreshToken', {
+                httpOnly: true,
+                secure: false,
+                sameSite: 'lax',
+                path: '/auth',
+            });
+
+            return { message: 'Logged out successfully' };
         } catch (error) {
-            console.log(error);
+            console.error('Logout failed:', error);
             throw error;
         }
     }

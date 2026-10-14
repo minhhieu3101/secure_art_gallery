@@ -49,7 +49,7 @@ export class GalleryEventsService {
                 person: person,
                 recorded_by: employee,
             });
-            await this.auditService.appendLog(person.id, `User ${email} entered the gallery`);
+            await this.auditService.appendLog(person.id, `User ${email} entered the gallery, recoreded by ${employee.role} ${employee.email}`);
             return event;
         } catch (error) {
             throw error;
@@ -90,7 +90,7 @@ export class GalleryEventsService {
                 person: person,
                 recorded_by: employee,
             });
-            await this.auditService.appendLog(person.id, `User ${email} left the gallery.`);
+            await this.auditService.appendLog(person.id, `User ${email} left the gallery, recoreded by ${employee.role} ${employee.email}`);
             return event;
         } catch (error) {
             throw error;
@@ -139,7 +139,7 @@ export class GalleryEventsService {
         }
         room.people += 1;
         await room.save();
-        await this.auditService.appendLog(person.id, `User ${email} entered Room ${room_number}.`);
+        await this.auditService.appendLog(person.id, `User ${email} entered Room ${room_number}, recoreded by ${employee.role} ${employee.email}`);
         return event;
     }
 
@@ -184,7 +184,7 @@ export class GalleryEventsService {
         });
         room.people -= 1;
         await room.save();
-        await this.auditService.appendLog(person.id, `User ${email} left Room ${room_number}.`);
+        await this.auditService.appendLog(person.id, `User ${email} left Room ${room_number}, recoreded by ${employee.role} ${employee.email}`);
         return event;
     }
 }

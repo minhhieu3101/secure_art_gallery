@@ -1,112 +1,143 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
-import { setAccessToken } from "../services/axiosClient";
-import {
-  login as loginRequest,
-  logout as logoutRequest,
-  refreshAccessToken,
-} from "../services/authService";
+import { jwtDecode } from 'jwt-decode';
+
+import { setAccessToken } from '../services/axiosClient';
+import { login as loginRequest, logout as logoutRequest, refreshAccessToken } from '../services/authService';
+
+export type Role = 'Admin' | 'Employee' | 'User';
+
+interface AccessTokenPayload {
+    id: string;
+    sid: string;
+    role?: Role;
+    exp?: number;
+}
 
 interface AuthContextType {
-  accessToken: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+    accessToken: string | null;
+    role: Role | null;
+    isAuthenticated: boolean;
+    isLoading: boolean;
+    login: (email: string, password: string) => Promise<void>;
+    logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
-  children: ReactNode;
+    children: ReactNode;
+}
+
+function isValidRole(value: unknown): value is Role {
+    return value === 'Admin' || value === 'Employee' || value === 'User';
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [accessToken, setAccessTokenState] = useState<string | null>(null);
+    const [accessToken, setAccessTokenState] = useState<string | null>(null);
+    const [role, setRole] = useState<Role | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-  const [isLoading, setIsLoading] = useState(true);
+    const updateAccessToken = (token: string | null) => {
+        setAccessTokenState(token);
+        setAccessToken(token);
 
-  // Update Access Token
-  const updateAccessToken = (token: string | null) => {
-    setAccessTokenState(token);
-    setAccessToken(token);
-  };
+        if (!token) {
+            setRole(null);
+            return;
+        }
 
-  // Restore session when React starts or page is refreshed
-  useEffect(() => {
-    const restoreSession = async () => {
-      try {
-        const response = await refreshAccessToken();
+        try {
+            const payload = jwtDecode<AccessTokenPayload>(token);
 
-        const newAccessToken = response.accessToken;
-
-        updateAccessToken(newAccessToken);
-      } catch {
-        updateAccessToken(null);
-      } finally {
-        setIsLoading(false);
-      }
+            if (isValidRole(payload.role)) {
+                setRole(payload.role);
+            } else {
+                setRole(null);
+            }
+        } catch {
+            setRole(null);
+        }
     };
 
-    restoreSession();
-  }, []);
+    // Restore the session after the app starts or the page refreshes.
+    useEffect(() => {
+        let cancelled = false;
 
-  // Login
-  const login = async (email: string, password: string): Promise<void> => {
-    const response = await loginRequest({
-      email,
-      password,
-    });
-    console.log(response)
+        const restoreSession = async () => {
+            try {
+                const response = await refreshAccessToken();
 
-    const newAccessToken = response.accessToken;
+                if (!cancelled) {
+                    updateAccessToken(response.accessToken ?? null);
+                }
+            } catch {
+                if (!cancelled) {
+                    updateAccessToken(null);
+                }
+            } finally {
+                if (!cancelled) {
+                    setIsLoading(false);
+                }
+            }
+        };
 
-    // Access Token chỉ lưu trong memory
-    // Refresh Token nằm trong HttpOnly Cookie
-    updateAccessToken(newAccessToken);
-  };
+        void restoreSession();
 
-  // Logout
-  const logout = async (): Promise<void> => {
-    try {
-      await logoutRequest();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      updateAccessToken(null);
-    }
-  };
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
-  const isAuthenticated = accessToken !== null;
+    const login = async (email: string, password: string): Promise<void> => {
+        const response = await loginRequest({
+            email,
+            password,
+        });
 
-  return (
-    <AuthContext.Provider
-      value={{
-        accessToken,
-        isAuthenticated,
-        isLoading,
-        login,
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+        if (!response?.accessToken) {
+            updateAccessToken(null);
+            throw new Error('Login response does not contain an access token.');
+        }
+
+        updateAccessToken(response.accessToken);
+    };
+
+    const logout = async (): Promise<void> => {
+        try {
+            await logoutRequest();
+        } catch (error) {
+            console.error('Logout failed:', error);
+        } finally {
+            updateAccessToken(null);
+        }
+    };
+
+    const isAuthenticated = accessToken !== null;
+
+    return (
+        <AuthContext.Provider
+            value={{
+                accessToken,
+                role,
+                isAuthenticated,
+                isLoading,
+                login,
+                logout,
+            }}
+        >
+            {children}
+        </AuthContext.Provider>
+    );
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAuth(): AuthContextType {
-  const context = useContext(AuthContext);
+    const context = useContext(AuthContext);
 
-  if (context === undefined) {
-    throw new Error("useAuth must be used inside AuthProvider");
-  }
+    if (context === undefined) {
+        throw new Error('useAuth must be used inside AuthProvider');
+    }
 
-  return context;
+    return context;
 }

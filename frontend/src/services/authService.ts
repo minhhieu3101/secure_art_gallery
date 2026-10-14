@@ -5,6 +5,17 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterData {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export const registerRequest = async (data: RegisterData) => {
+  const response = await api.post("/auth/register", data);
+  return response.data;
+};
+
 export const login = async (data: LoginRequest) => {
   const response = await api.post("/auth/login", data);
 

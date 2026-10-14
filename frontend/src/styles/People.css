@@ -1,5 +1,10 @@
+/* =========================
+   People Page
+========================= */
+
 .people-page {
     padding: 24px;
+    color: #1e344b;
 }
 
 /* =========================
@@ -31,7 +36,7 @@
 
 .people-stats {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px;
     margin-bottom: 24px;
 }
@@ -41,7 +46,7 @@
     align-items: center;
     gap: 14px;
     padding: 18px;
-    background: white;
+    background: #fff;
     border: 1px solid #ddd;
     border-radius: 8px;
 }
@@ -55,16 +60,16 @@
 .people-stat-card h2 {
     margin: 0;
     font-size: 24px;
+    font-weight: 700;
 }
 
-/* Statistic icons */
-
 .people-stat-icon {
-    width: 42px;
-    height: 42px;
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
+    width: 42px;
+    height: 42px;
     border-radius: 8px;
     font-size: 20px;
 }
@@ -86,10 +91,10 @@
 ========================= */
 
 .people-section {
-    background: white;
+    overflow: hidden;
+    background: #fff;
     border: 1px solid #ddd;
     border-radius: 8px;
-    overflow: hidden;
 }
 
 .people-section-header {
@@ -103,6 +108,7 @@
 .people-section-header h2 {
     margin: 0;
     font-size: 18px;
+    font-weight: 700;
 }
 
 .people-section-header span {
@@ -136,14 +142,23 @@
     color: #555;
     font-size: 13px;
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .people-table td {
     font-size: 14px;
 }
 
+.people-table tbody tr {
+    transition: background 0.15s ease;
+}
+
 .people-table tbody tr:hover {
     background: #fafafa;
+}
+
+.people-table tbody tr:last-child td {
+    border-bottom: none;
 }
 
 /* =========================
@@ -158,11 +173,12 @@
 }
 
 .person-icon {
+    flex-shrink: 0;
     font-size: 18px;
 }
 
 /* =========================
-   Role
+   Role Badge
 ========================= */
 
 .person-role {
@@ -176,7 +192,7 @@
 }
 
 /* =========================
-   Status
+   Status Badge
 ========================= */
 
 .person-status {
@@ -198,24 +214,59 @@
 }
 
 /* =========================
-   Action
+   Action Buttons
 ========================= */
 
-.view-person-button {
+.people-action-buttons {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.view-person-button,
+.delete-person-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
     padding: 6px 12px;
     border: 1px solid #ccc;
-    background: white;
     border-radius: 5px;
-    cursor: pointer;
+    background: #fff;
+    font-family: inherit;
     font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.view-person-button {
+    border-color: #cbdaf7;
+    color: #1769e8;
 }
 
 .view-person-button:hover {
-    background: #f5f5f5;
+    border-color: #1769e8;
+    background: #eff6ff;
+}
+
+.delete-person-button {
+    border-color: #fecaca;
+    color: #dc2626;
+}
+
+.delete-person-button:hover {
+    border-color: #dc2626;
+    background: #fef2f2;
 }
 
 /* =========================
-   Loading / Error
+   Loading / Error / Success
 ========================= */
 
 .people-message {
@@ -226,6 +277,17 @@
 
 .people-error {
     color: #c62828;
+}
+
+.people-success {
+    margin-bottom: 18px;
+    padding: 12px 16px;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    background: #f0fdf4;
+    color: #15803d;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 /* =========================
@@ -239,12 +301,284 @@
 }
 
 /* =========================
+   Modal Overlay
+========================= */
+
+.people-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 20px;
+    background: rgb(15 23 42 / 45%);
+    backdrop-filter: blur(3px);
+}
+
+/* =========================
+   Change Role Modal
+========================= */
+
+.people-role-modal {
+    width: 100%;
+    max-width: 460px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    padding: 26px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 20px 50px rgb(15 23 42 / 18%);
+}
+
+.people-role-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.people-role-modal-header h2 {
+    margin: 0;
+    color: #1e344b;
+    font-size: 23px;
+    font-weight: 700;
+}
+
+.people-role-modal-header p {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.people-modal-close {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 7px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 25px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.people-modal-close:hover:not(:disabled) {
+    background: #e2e8f0;
+}
+
+.people-modal-close:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Role Options */
+
+.people-role-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.people-role-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.people-role-option:hover {
+    background: #f8fafc;
+}
+
+.people-role-option.selected {
+    border-color: #1769e8;
+    background: #eff6ff;
+}
+
+.people-role-option input {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    accent-color: #1769e8;
+    cursor: pointer;
+}
+
+.people-role-option span {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.people-role-option strong {
+    color: #1e344b;
+    font-size: 15px;
+}
+
+.people-role-option small {
+    color: #64748b;
+    font-size: 13px;
+}
+
+/* =========================
+   Modal Error
+========================= */
+
+.people-role-error {
+    margin-top: 16px;
+    padding: 12px;
+    border: 1px solid #fecaca;
+    border-radius: 7px;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* =========================
+   Modal Footer
+========================= */
+
+.people-role-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid #eee;
+}
+
+.people-role-modal-footer button {
+    min-height: 40px;
+    padding: 9px 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.people-role-modal-footer button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.people-role-cancel {
+    background: #fff;
+    color: #475569;
+}
+
+.people-role-cancel:hover:not(:disabled) {
+    background: #f5f5f5;
+}
+
+.people-role-modal-footer .people-role-save {
+    border-color: #1769e8;
+    background: #1769e8;
+    color: #fff;
+}
+
+.people-role-modal-footer .people-role-save:hover:not(:disabled) {
+    border-color: #1256c5;
+    background: #1256c5;
+}
+
+/* =========================
+   Delete User Modal
+========================= */
+
+.people-delete-modal {
+    width: 100%;
+    max-width: 440px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    padding: 26px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 20px 50px rgb(15 23 42 / 18%);
+}
+
+.people-delete-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    background: #fef2f2;
+    font-size: 26px;
+}
+
+.people-delete-modal h2 {
+    margin: 0 0 12px;
+    color: #1e344b;
+    font-size: 23px;
+    font-weight: 700;
+}
+
+.people-delete-modal p {
+    margin: 0 0 16px;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.people-delete-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.people-delete-modal .people-delete-warning {
+    margin: 14px 0 0;
+    color: #dc2626;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.people-role-modal-footer .people-delete-confirm {
+    border-color: #dc2626;
+    background: #dc2626;
+    color: #fff;
+}
+
+.people-role-modal-footer .people-delete-confirm:hover:not(:disabled) {
+    border-color: #b91c1c;
+    background: #b91c1c;
+}
+
+/* =========================
    Tablet
 ========================= */
 
 @media (max-width: 900px) {
     .people-stats {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
@@ -285,6 +619,11 @@
     .people-table {
         min-width: 700px;
     }
+
+    .people-role-modal,
+    .people-delete-modal {
+        padding: 22px;
+    }
 }
 
 /* =========================
@@ -312,5 +651,32 @@
         width: 38px;
         height: 38px;
         font-size: 18px;
+    }
+
+    .people-modal-overlay {
+        padding: 12px;
+    }
+
+    .people-role-modal,
+    .people-delete-modal {
+        padding: 20px;
+    }
+
+    .people-role-modal-header h2,
+    .people-delete-modal h2 {
+        font-size: 20px;
+    }
+
+    .people-role-modal-footer {
+        flex-direction: column-reverse;
+    }
+
+    .people-role-modal-footer button {
+        width: 100%;
+    }
+
+    .people-action-buttons {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }

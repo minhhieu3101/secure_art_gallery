@@ -15,29 +15,39 @@ find_path(
     NODE_API_INCLUDE_DIR
     node_api.h
     PATHS
-        $ENV{HOME}/.nvm/versions/node/v22.22.3/include/node
+        "$ENV{HOME}/.nvm/versions/node/v22.22.3/include/node"
         /opt/homebrew/include/node
         /usr/local/include/node
 )
 
+if(NOT NODE_API_INCLUDE_DIR)
+    message(FATAL_ERROR "Cannot find Node.js headers (node_api.h)")
+endif()
+
 # Find node-addon-api headers
 execute_process(
     COMMAND node -p "require('node-addon-api').include"
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/..
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/.."
     OUTPUT_VARIABLE NODE_ADDON_API_DIR
     OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE NODE_ADDON_API_RESULT
 )
 
 string(REPLACE "\"" "" NODE_ADDON_API_DIR "${NODE_ADDON_API_DIR}")
 
+if(NOT NODE_ADDON_API_RESULT EQUAL 0 OR NOT NODE_ADDON_API_DIR)
+    message(FATAL_ERROR "Cannot find node-addon-api. Run npm install node-addon-api.")
+endif()
+
+# Build Node.js addon
 add_library(audit MODULE
     audit_logic.cpp
     audit_wrapper.cpp
 )
 
 target_include_directories(audit PRIVATE
-    ${NODE_API_INCLUDE_DIR}
-    ${NODE_ADDON_API_DIR}
+    "${NODE_API_INCLUDE_DIR}"
+    "${NODE_ADDON_API_DIR}"
     ${LIBPQXX_INCLUDE_DIRS}
 )
 
@@ -49,12 +59,6 @@ target_link_libraries(audit PRIVATE
     ${LIBPQXX_LIBRARIES}
 )
 
-if(APPLE)
-    target_link_options(audit PRIVATE
-        "-undefined" "dynamic_lookup"
-    )
-endif()
-
 target_compile_options(audit PRIVATE
     ${LIBPQXX_CFLAGS_OTHER}
 )
@@ -62,6 +66,12 @@ target_compile_options(audit PRIVATE
 target_compile_definitions(audit PRIVATE
     NAPI_CPP_EXCEPTIONS
 )
+
+if(APPLE)
+    target_link_options(audit PRIVATE
+        "-undefined" "dynamic_lookup"
+    )
+endif()
 
 set_target_properties(audit PROPERTIES
     PREFIX ""

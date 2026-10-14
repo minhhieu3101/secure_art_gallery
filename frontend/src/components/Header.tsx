@@ -1,26 +1,28 @@
-import { useAuth } from "../context/AuthContext";
-import "../styles/header.css";
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import '../styles/header.css';
 
 function Header() {
-  const { logout } = useAuth();
+    const { logout } = useAuth();
+    const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await logout();
-  };
+    const handleLogout = async () => {
+        await logout();
+        navigate('/login', { replace: true });
+    };
 
-  return (
-    <header className="header">
-      <div className="header-title">Art Gallery Management System</div>
+    return (
+        <header className="header">
+            <div className="header-title">Art Gallery Management System</div>
 
-      <div className="header-user">
-        <span className="user-icon">👤</span>
+            <div className="header-user">
+                <span className="user-icon">👤</span>
+                <span className="user-name">Admin</span>
 
-        <span className="user-name">Admin</span>
-
-        <button onClick={handleLogout}>Logout</button>
-      </div>
-    </header>
-  );
+                <button onClick={handleLogout}>Logout</button>
+            </div>
+        </header>
+    );
 }
 
 export default Header;

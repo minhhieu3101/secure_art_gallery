@@ -1,7 +1,60 @@
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import "../styles/sidebar.css";
 
+interface MenuItem {
+  label: string;
+  path: string;
+  icon: string;
+  roles: string[];
+}
+
+const menuItems: MenuItem[] = [
+  {
+    label: "Dashboard",
+    path: "/dashboard",
+    icon: "▣",
+    roles: ["Admin", "Employee", "User"],
+  },
+  {
+    label: "Rooms",
+    path: "/rooms",
+    icon: "▤",
+    roles: ["Admin"],
+  },
+  {
+    label: "People",
+    path: "/people",
+    icon: "♙",
+    roles: ["Admin", "Employee"],
+  },
+  {
+    label: "Events",
+    path: "/events",
+    icon: "◷",
+    roles: ["Admin", "Employee"],
+  },
+  {
+    label: "Audit Logs",
+    path: "/audit-logs",
+    icon: "☷",
+    roles: ["Admin"],
+  },
+  {
+    label: "My Account",
+    path: "/my-account",
+    icon: "♙",
+    roles: ["Admin", "Employee", "User"],
+  },
+];
+
 function Sidebar() {
+  const { role, isLoading } = useAuth();
+
+  const visibleItems = menuItems.filter(
+    (item) => role !== null && item.roles.includes(role),
+  );
+
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
@@ -10,35 +63,20 @@ function Sidebar() {
       </div>
 
       <nav className="sidebar-nav">
-        <NavLink to="/dashboard">
-          <span>▣</span>
-          Dashboard
-        </NavLink>
-
-        <NavLink to="/rooms">
-          <span>▤</span>
-          Rooms
-        </NavLink>
-
-        <NavLink to="/people">
-          <span>♙</span>
-          People
-        </NavLink>
-
-        <NavLink to="/events">
-          <span>◷</span>
-          Events
-        </NavLink>
-
-        <NavLink to="/audit-logs">
-          <span>☷</span>
-          Audit Logs
-        </NavLink>
-
-        <NavLink to="/users">
-          <span>♙</span>
-          Users
-        </NavLink>
+        {isLoading
+          ? null
+          : visibleItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  isActive ? "sidebar-link active" : "sidebar-link"
+                }
+              >
+                <span className="sidebar-link-icon">{item.icon}</span>
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
       </nav>
     </aside>
   );

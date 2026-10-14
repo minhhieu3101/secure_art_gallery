@@ -31,7 +31,7 @@ export class UserService {
 
     async findUserForLogin(email: string, password: string) {
         const user = await this.userRepository.getByCondition({
-            where: [{ email: email }],
+            where: [{ email: email, status: Not(UserStatus.deleted)}],
         });
         if (!user || !(await comparePassword(password, user.password))) {
             throw new HttpException(
@@ -186,7 +186,7 @@ export class UserService {
         }
     }
 
-    async grantPermission(id: string) {
+    async grantPermission(id: string, role: string) {
         try {
             const user = await this.userRepository.getByCondition({
                 where: {
@@ -197,12 +197,16 @@ export class UserService {
             if (!user) {
                 throw new HttpException(ERROR.USER_NOT_FOUND.message, ERROR.USER_NOT_FOUND.statusCode);
             }
-            if (user.role === Role.admin) {
-                throw new HttpException(ERROR.USER_IS_ADMIN.message, ERROR.USER_IS_ADMIN.statusCode);
+            if (user.status == UserStatus.inactive) {
+                throw new HttpException('User is inactive', ERROR.USER_NOT_FOUND.statusCode);
             }
-            user.role = Role.admin;
+            if (user.role === role) {
+                throw new HttpException(`This user is already ${user.role}`, ERROR.USER_NOT_FOUND.statusCode);
+            }
+            user.role = role;
             user.updatedAt = new Date();
             await this.userRepository.save(user);
+            await this.auditService.appendLog(user.id, `GRANT USER ${user.username} PERMISSION TO ROLE ${user.role} SUCCESS`)
             return {
                 message: `Grant permission is success `,
             };
@@ -228,8 +232,7 @@ export class UserService {
             user.status = UserStatus.deleted;
             user.updatedAt = new Date();
             await this.userRepository.save(user);
-            // await this.cacheService.del(`users:${user.id}:accessToken`);
-            // await this.cacheService.del(`users:${user.id}:refreshToken`);
+            await this.auditService.appendLog(user.id, `DELETE USER ${user.username} SUCCESS`)
             return {
                 message: `Deleted user is success `,
             };

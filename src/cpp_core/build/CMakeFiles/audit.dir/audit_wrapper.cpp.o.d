@@ -1,8 +1,8 @@
 CMakeFiles/audit.dir/audit_wrapper.cpp.o: \
   /Users/Admin/Desktop/Hieu/KSU_study/Secure_programming/secure-art-gallery/src/cpp_core/audit_wrapper.cpp \
   /Users/Admin/Desktop/Hieu/KSU_study/Secure_programming/secure-art-gallery/node_modules/node-addon-api/napi.h \
-  /usr/local/include/node/node_api.h \
-  /usr/local/include/node/js_native_api.h \
+  /Users/Admin/.nvm/versions/node/v22.22.3/include/node/node_api.h \
+  /Users/Admin/.nvm/versions/node/v22.22.3/include/node/js_native_api.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/stdbool.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__config \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__config_site \
@@ -10,7 +10,7 @@ CMakeFiles/audit.dir/audit_wrapper.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/stddef.h \
   /Library/Developer/CommandLineTools/usr/lib/clang/15.0.0/include/stddef.h \
   /Library/Developer/CommandLineTools/usr/lib/clang/15.0.0/include/__stddef_max_align_t.h \
-  /usr/local/include/node/js_native_api_types.h \
+  /Users/Admin/.nvm/versions/node/v22.22.3/include/node/js_native_api_types.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/stdint.h \
   /Library/Developer/CommandLineTools/usr/lib/clang/15.0.0/include/stdint.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h \
@@ -39,7 +39,7 @@ CMakeFiles/audit.dir/audit_wrapper.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/_types/_uintptr_t.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types/_intmax_t.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types/_uintmax_t.h \
-  /usr/local/include/node/node_api_types.h \
+  /Users/Admin/.nvm/versions/node/v22.22.3/include/node/node_api_types.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/functional \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__algorithm/search.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__algorithm/comp.h \

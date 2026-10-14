@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards, Req, Patch } from '@nestjs/common';
 import { RoomService } from './rooms.service';
-import { CreateRoomDto } from './dto/createRoom.dto';
+import { ChangeRoomStatusDTO, CreateRoomDto } from './dto/createRoom.dto';
 import { Roles } from '../guards/roles.decorator';
 import { Role } from '../../commons/enum/roles.enum';
 import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
@@ -14,9 +14,22 @@ export class RoomsController {
     @Roles(Role.admin)
     @UseGuards(RolesGuard)
     @ApiBearerAuth()
-    async createRoom(@Body() room: CreateRoomDto): Promise<any> {
+    async createRoom(@Body() room: CreateRoomDto, @Req() req: any): Promise<any> {
         try {
-            return await this.roomService.createRoom(Number(room.number), Number(room.occupancy));
+            return await this.roomService.createRoom(room.number, room.occupancy, req.userId);
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    @Patch('room/changeStatus')
+    @Roles(Role.admin)
+    @UseGuards(RolesGuard)
+    @ApiBearerAuth()
+    async changeRoomStatus(@Body() input: ChangeRoomStatusDTO, @Req() req: any): Promise<any> {
+        try {
+            return await this.roomService.changeRoomStatus(input.number, input.status, req.userId);
         } catch (error) {
             console.log(error);
             throw error;

@@ -7,6 +7,7 @@
 struct AuditLog {
     std::string auditId;
     std::string userId;
+    std::string email;
     std::string action;
     std::string createdAt;
 };

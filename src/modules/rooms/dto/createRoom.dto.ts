@@ -1,15 +1,32 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsNumber, Length, Max, Min } from 'class-validator';
+import { RoomStatus } from '../../../commons/enum/room.status';
 
 export class CreateRoomDto {
-    @ApiProperty()
+    @ApiProperty({ example: 106 })
     @IsNotEmpty()
-    @IsString()
-    @Length(3)
-    number: string;
+    @IsInt()
+    @Min(100)
+    @Max(999)
+    number: number;
+  
+    @ApiProperty({ example: 50 })
+    @IsNotEmpty()
+    @IsInt()
+    @Min(1)
+    occupancy: number;
+  }
 
-    @ApiProperty()
+export class ChangeRoomStatusDTO {
+    @ApiProperty({ example: 106 })
     @IsNotEmpty()
-    @IsString()
-    occupancy: string;
+    @IsInt()
+    @Min(100)
+    @Max(999)
+    number: number;
+
+    @ApiProperty({ enum: RoomStatus })
+    @IsNotEmpty()
+    @IsEnum(RoomStatus)
+    status: RoomStatus;
 }

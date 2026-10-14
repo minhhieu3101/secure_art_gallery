@@ -8,6 +8,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Rooms from "./pages/Rooms";
 import People from "./pages/People";
 import Events from "./pages/Events";
+import AuditLogs from "./pages/AuditLogs";
+import MyAccount from "./pages/MyAccount";
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
             <Route path="/rooms" element={<Rooms />} />
             <Route path="/people" element={<People />} />
             <Route path="/events" element={<Events/>} />
+            <Route path="/audit-logs" element={<AuditLogs/>} />
+            <Route path="/my-account" element={<MyAccount/>} />
           </Route>
         </Route>
       </Routes>

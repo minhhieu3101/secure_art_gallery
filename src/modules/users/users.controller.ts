@@ -22,6 +22,7 @@ import { changePasswordDTO } from './dto/changePassword.dto';
 import { Roles } from '../guards/roles.decorator';
 import { Role } from '../../commons/enum/roles.enum';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { GrantDTO } from './dto/grant.dto';
 
 @ApiTags('User')
 @Controller('')
@@ -55,7 +56,7 @@ export class UserController {
     }
 
     @Get('/dashboard/user')
-    @Roles(Role.admin)
+    @Roles(Role.admin, Role.employee)
     @UseGuards(RolesGuard)
     @UseInterceptors(ClassSerializerInterceptor)
     @ApiBearerAuth()
@@ -82,8 +83,8 @@ export class UserController {
         type: 'string',
     })
     @ApiBearerAuth()
-    grantPermission(@Param('userId', ParseUUIDPipe) userId: string) {
-        return this.userService.grantPermission(userId);
+    grantPermission(@Param('userId', ParseUUIDPipe) userId: string, @Body() info: GrantDTO) {
+        return this.userService.grantPermission(userId, info.role);
     }
 
     @Delete('/admin/user/:userId')
