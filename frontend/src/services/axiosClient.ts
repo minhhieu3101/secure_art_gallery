@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 
-const baseURL = 'http://localhost:3000';
+const baseURL = import.meta.env.DEV ? 'http://localhost:3000' : '/api';
 
 const axiosClient: AxiosInstance = axios.create({
     baseURL,
@@ -11,15 +11,21 @@ const axiosClient: AxiosInstance = axios.create({
     },
 });
 
-let accessToken: string | null = null;
+let accessToken: string | null = localStorage.getItem('accessToken');
 let isRefreshing = false;
 
 type RetryableRequest = InternalAxiosRequestConfig & {
     _retry?: boolean;
 };
 
-export const setAccessToken = (token: string | null) => {
+export const setAccessToken = (token: string | null): void => {
     accessToken = token;
+
+    if (token) {
+        localStorage.setItem('accessToken', token);
+    } else {
+        localStorage.removeItem('accessToken');
+    }
 };
 
 axiosClient.interceptors.request.use(
@@ -47,21 +53,23 @@ axiosClient.interceptors.response.use(
 
         const requestUrl = originalRequest.url ?? '';
 
-        // Không thử refresh khi login, refresh hoặc logout thất bại.
-        if (
+        // Không refresh khi endpoint xác thực bị lỗi.
+        const isAuthEndpoint =
             requestUrl.includes('/auth/login') ||
+            requestUrl.includes('/auth/register') ||
             requestUrl.includes('/auth/refresh') ||
-            requestUrl.includes('/auth/logout')
-        ) {
+            requestUrl.includes('/auth/logout');
+
+        if (isAuthEndpoint) {
             return Promise.reject(error);
         }
 
-        // Chỉ refresh khi có access token và request trả về 401.
+        // Chỉ refresh khi request trả về 401 và có access token.
         if (error.response?.status !== 401 || !accessToken || originalRequest._retry) {
             return Promise.reject(error);
         }
 
-        // Không thực hiện refresh đồng thời nhiều lần.
+        // Không refresh đồng thời nhiều lần.
         if (isRefreshing) {
             return Promise.reject(error);
         }
@@ -70,7 +78,6 @@ axiosClient.interceptors.response.use(
         isRefreshing = true;
 
         try {
-            // Dùng axios riêng để tránh chạy lại interceptor.
             const response = await axios.post(
                 `${baseURL}/auth/refresh`,
                 {},

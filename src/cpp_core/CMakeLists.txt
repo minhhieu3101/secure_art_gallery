@@ -11,17 +11,17 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBPQXX REQUIRED libpqxx)
 
 # Find Node.js headers
-find_path(
-    NODE_API_INCLUDE_DIR
+find_path(NODE_API_INCLUDE_DIR
     node_api.h
     PATHS
-        "$ENV{HOME}/.nvm/versions/node/v22.22.3/include/node"
-        /opt/homebrew/include/node
+        /usr/include/node
         /usr/local/include/node
+        /opt/homebrew/include/node
+        "$ENV{HOME}/.nvm/versions/node/v22.22.3/include/node"
 )
 
 if(NOT NODE_API_INCLUDE_DIR)
-    message(FATAL_ERROR "Cannot find Node.js headers (node_api.h)")
+    message(FATAL_ERROR "Could not find node_api.h")
 endif()
 
 # Find node-addon-api headers

@@ -4,7 +4,7 @@ import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HandleResponseInterceptor } from './commons/interceptors/response.interceptors';
-import cookieParser from "cookie-parser";
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -13,9 +13,9 @@ async function bootstrap() {
     app.useGlobalPipes(new ValidationPipe());
     app.useGlobalInterceptors(new HandleResponseInterceptor());
     app.enableCors({
-        origin: 'http://localhost:5173',
+        origin: ['http://localhost:5173', 'http://localhost:8080'],
         credentials: true,
-      });
+    });
     const config = new DocumentBuilder()
         .addBearerAuth()
         .setTitle('Secure Art Gallery Project')
@@ -24,6 +24,7 @@ async function bootstrap() {
         .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
-    await app.listen(3000);
+    await app.listen(3000, '0.0.0.0');
+    // await app.listen(3000);
 }
 bootstrap();

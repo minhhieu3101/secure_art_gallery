@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
 import { jwtDecode } from 'jwt-decode';
-
 import { setAccessToken } from '../services/axiosClient';
+
 import { login as loginRequest, logout as logoutRequest, refreshAccessToken } from '../services/authService';
 
 export type Role = 'Admin' | 'Employee' | 'User';
@@ -11,12 +11,14 @@ interface AccessTokenPayload {
     id: string;
     sid: string;
     role?: Role;
+    username?: string;
     exp?: number;
 }
 
 interface AuthContextType {
     accessToken: string | null;
     role: Role | null;
+    username: string | null;
     isAuthenticated: boolean;
     isLoading: boolean;
     login: (email: string, password: string) => Promise<void>;
@@ -35,7 +37,9 @@ function isValidRole(value: unknown): value is Role {
 
 export function AuthProvider({ children }: AuthProviderProps) {
     const [accessToken, setAccessTokenState] = useState<string | null>(null);
+
     const [role, setRole] = useState<Role | null>(null);
+    const [username, setUsername] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const updateAccessToken = (token: string | null) => {
@@ -44,32 +48,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (!token) {
             setRole(null);
+            setUsername(null);
             return;
         }
 
         try {
             const payload = jwtDecode<AccessTokenPayload>(token);
 
-            if (isValidRole(payload.role)) {
-                setRole(payload.role);
-            } else {
-                setRole(null);
-            }
+            setRole(isValidRole(payload.role) ? payload.role : null);
+
+            setUsername(payload.username ?? null);
         } catch {
             setRole(null);
+            setUsername(null);
         }
     };
 
-    // Restore the session after the app starts or the page refreshes.
     useEffect(() => {
         let cancelled = false;
 
         const restoreSession = async () => {
+            const currentPath = window.location.pathname;
+
+            if (currentPath === '/login' || currentPath === '/register') {
+                setIsLoading(false);
+                return;
+            }
+
             try {
                 const response = await refreshAccessToken();
 
                 if (!cancelled) {
-                    updateAccessToken(response.accessToken ?? null);
+                    updateAccessToken(response?.accessToken ?? null);
                 }
             } catch {
                 if (!cancelled) {
@@ -97,6 +107,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (!response?.accessToken) {
             updateAccessToken(null);
+
             throw new Error('Login response does not contain an access token.');
         }
 
@@ -120,6 +131,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             value={{
                 accessToken,
                 role,
+                username,
                 isAuthenticated,
                 isLoading,
                 login,

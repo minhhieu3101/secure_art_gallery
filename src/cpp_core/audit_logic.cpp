@@ -1,4 +1,3 @@
-
 #include "audit_logic.h"
 #include <pqxx/pqxx>
 #include <stdexcept>
@@ -11,11 +10,12 @@ bool appendLog(
     pqxx::connection conn(connectionString);
     pqxx::work txn(conn);
 
-    txn.exec(
+    txn.exec_params(
         "INSERT INTO public.audit_logs "
         "(audit_id, user_id, action, created_at) "
         "VALUES (gen_random_uuid()::text, $1, $2, NOW())",
-        pqxx::params{userId, action}
+        userId,
+        action
     );
 
     txn.commit();
@@ -29,7 +29,7 @@ std::vector<AuditLog> readLog(
     pqxx::connection conn(connectionString);
     pqxx::read_transaction txn(conn);
 
-    auto result = txn.exec(
+    auto result = txn.exec_params(
         "SELECT a.audit_id, a.user_id, u.email, "
         "a.action, a.created_at "
         "FROM public.audit_logs AS a "
@@ -37,7 +37,7 @@ std::vector<AuditLog> readLog(
         "ON a.user_id = u.id::text "
         "WHERE a.user_id = $1 "
         "ORDER BY a.created_at DESC",
-        pqxx::params{userId}
+        userId
     );
 
     std::vector<AuditLog> logs;

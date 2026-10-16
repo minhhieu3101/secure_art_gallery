@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/header.css';
 
 function Header() {
-    const { logout } = useAuth();
+    const { logout, role, username } = useAuth();
     const navigate = useNavigate();
 
     const handleLogout = async () => {
@@ -17,7 +17,11 @@ function Header() {
 
             <div className="header-user">
                 <span className="user-icon">👤</span>
-                <span className="user-name">Admin</span>
+
+                <span className="user-name">
+                    {role ?? 'User'}
+                    {username ? ` - ${username}` : ''}
+                </span>
 
                 <button onClick={handleLogout}>Logout</button>
             </div>

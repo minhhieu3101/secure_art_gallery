@@ -49,6 +49,7 @@ export class AuthService {
                     id: userId,
                     sid: session.id,
                     role: user.role,
+                    username: user.username
                 },
                 {
                     expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
@@ -85,6 +86,7 @@ export class AuthService {
                     id: user.id,
                     sid: session.id,
                     role: user.role,
+                    username: user.username
                 },
                 {
                     expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),

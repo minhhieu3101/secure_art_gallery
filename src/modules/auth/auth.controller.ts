@@ -27,9 +27,9 @@ export class AuthController {
     @Post('register')
     @UseInterceptors(ClassSerializerInterceptor)
     @ApiQuery({ name: 'role', enum: Role })
-    register(@Body() user: CreateAccountDto): Promise<User> {
+    async register(@Body() user: CreateAccountDto): Promise<User> {
         try {
-            return this.authService.register(user);
+            return await this.authService.register(user);
         } catch (error) {
             console.log(error);
             throw error;
@@ -51,7 +51,7 @@ export class AuthController {
                 secure: false,
                 sameSite: 'lax',
                 maxAge: 7 * 24 * 60 * 60 * 1000,
-                path: '/auth',
+                path: '/',
             });
             console.log(result);
             return {
