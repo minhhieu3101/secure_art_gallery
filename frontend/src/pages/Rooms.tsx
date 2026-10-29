@@ -1,110 +1,66 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { useCallback, useEffect, useState } from "react";
-import type { ChangeEvent, FormEvent } from "react";
-import axios from "axios";
-import axiosClient from "../services/axiosClient";
-import "../styles/Room.css";
-
-type RoomStatus = "open" | "closed";
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import axiosClient from '../services/axiosClient';
+import '../styles/Room.css';
 
 interface Room {
-  id?: string;
+  id: string;
   number: number;
   people: number;
   occupancy: number;
-  status: RoomStatus | string;
-}
-
-interface RoomForm {
-  number: number | "";
-  occupancy: number | "";
-}
-
-const initialForm: RoomForm = {
-  number: "",
-  occupancy: 50,
-};
-
-function getErrorMessage(
-  error: unknown,
-  fallback: string,
-): string {
-  if (axios.isAxiosError(error)) {
-    const message = error.response?.data?.message;
-
-    if (Array.isArray(message)) {
-      return message.join(", ");
-    }
-
-    if (typeof message === "string") {
-      return message;
-    }
-
-    if (error.response?.status === 401) {
-      return "Please log in again.";
-    }
-
-    if (error.response?.status === 403) {
-      return "You need admin permission to perform this action.";
-    }
-
-    return `${fallback} (HTTP ${
-      error.response?.status ?? "network error"
-    }).`;
-  }
-
-  return fallback;
-}
-
-function normalizeRooms(responseData: unknown): Room[] {
-  let data: unknown = responseData;
-
-  if (
-    data &&
-    typeof data === "object" &&
-    "data" in data
-  ) {
-    data = (data as { data: unknown }).data;
-  }
-
-  if (!Array.isArray(data)) {
-    return [];
-  }
-
-  return data.map((item: Record<string, unknown>) => ({
-    id: String(item.id ?? item.roomId ?? item.number ?? ""),
-    number: Number(item.number ?? 0),
-    people: Number(item.people ?? item.peopleCount ?? 0),
-    occupancy: Number(item.occupancy ?? item.capacity ?? 0),
-    status: String(item.status ?? "open").toLowerCase(),
-  }));
+  status: string;
 }
 
 function Rooms() {
+  const navigate = useNavigate();
+
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
-  const [pageError, setPageError] = useState("");
-
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [form, setForm] = useState<RoomForm>(initialForm);
-  const [formError, setFormError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // Add Room modal
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [roomNumber, setRoomNumber] = useState('');
+  const [occupancy, setOccupancy] = useState('');
+  const [formError, setFormError] = useState('');
+
+  // Change Status modal
+  const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
-  const [statusError, setStatusError] = useState("");
-  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [newStatus, setNewStatus] = useState('open');
 
   const fetchRooms = useCallback(async () => {
-    try {
-      setPageError("");
+    setLoading(true);
+    setError('');
 
-      const response = await axiosClient.get("/dashboard/room");
-      setRooms(normalizeRooms(response.data));
-    } catch (error: unknown) {
-      console.error("Failed to fetch rooms:", error);
-      setPageError(getErrorMessage(error, "Failed to load rooms."));
+    try {
+      const response = await axiosClient.get('/dashboard/room');
+      const data = response.data?.data ?? response.data;
+
+      if (!Array.isArray(data)) {
+        throw new Error('The server did not return a room list.');
+      }
+
+      setRooms(data);
+    } catch (err: unknown) {
+      console.error('Failed to load rooms:', err);
+
+      if (axios.isAxiosError(err)) {
+        setError(
+          err.response?.data?.message ||
+            'Could not load rooms. Please try again.',
+        );
+      } else {
+        setError(
+          err instanceof Error ? err.message : 'Could not load rooms.',
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -117,95 +73,82 @@ function Rooms() {
   const totalRooms = rooms.length;
 
   const totalPeople = rooms.reduce(
-    (total, room) => total + room.people,
+    (total, room) => total + (Number(room.people) || 0),
     0,
   );
 
   const openRooms = rooms.filter(
-    (room) => room.status === "open",
+    (room) => room.status?.toLowerCase() === 'open',
   ).length;
-
-  const handleFormChange = (
-    event: ChangeEvent<HTMLInputElement>,
-  ) => {
-    const { name, value } = event.target;
-
-    setForm((previous) => ({
-      ...previous,
-      [name]: value === "" ? "" : Number(value),
-    }));
-
-    setFormError("");
-    setSuccessMessage("");
-  };
-
-  const openAddModal = () => {
-    setForm(initialForm);
-    setFormError("");
-    setSuccessMessage("");
-    setIsAddModalOpen(true);
-  };
 
   const closeAddModal = () => {
     if (saving) return;
 
-    setIsAddModalOpen(false);
-    setFormError("");
+    setShowAddModal(false);
+    setRoomNumber('');
+    setOccupancy('');
+    setFormError('');
   };
 
-  const handleAddRoom = async (
-    event: FormEvent<HTMLFormElement>,
-  ) => {
+  const handleAddRoom = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormError("");
-    setSuccessMessage("");
+    setFormError('');
+    setError('');
+    setSuccessMessage('');
 
-    const { number, occupancy } = form;
+    const number = Number(roomNumber);
+    const capacity = Number(occupancy);
 
     if (
-      number === "" ||
+      !roomNumber.trim() ||
+      !occupancy.trim() ||
       !Number.isInteger(number) ||
-      number < 100 ||
-      number > 999
+      number <= 0 ||
+      !Number.isInteger(capacity) ||
+      capacity <= 0
     ) {
-      setFormError("Room number must be a 3-digit number.");
-      return;
-    }
-
-    if (
-      occupancy === "" ||
-      !Number.isInteger(occupancy) ||
-      occupancy < 1
-    ) {
-      setFormError("Maximum capacity must be a positive integer.");
+      setFormError(
+        'Enter a valid positive room number and occupancy.',
+      );
       return;
     }
 
     const duplicate = rooms.some(
-      (room) => room.number === number,
+      (room) => Number(room.number) === number,
     );
 
     if (duplicate) {
-      setFormError(`Room ${number} already exists.`);
+      setFormError('This room number already exists.');
       return;
     }
 
     setSaving(true);
 
     try {
-      await axiosClient.post("/room/createRoom", {
+      await axiosClient.post('/room/createRoom', {
         number,
-        occupancy,
+        occupancy: capacity,
       });
 
-      setIsAddModalOpen(false);
-      setForm(initialForm);
+      setShowAddModal(false);
+      setRoomNumber('');
+      setOccupancy('');
       setSuccessMessage(`Room ${number} was created successfully.`);
 
       await fetchRooms();
-    } catch (error: unknown) {
-      console.error("Failed to create room:", error);
-      setFormError(getErrorMessage(error, "Failed to create room."));
+    } catch (err: unknown) {
+      console.error('Failed to create room:', err);
+
+      if (axios.isAxiosError(err)) {
+        const message = err.response?.data?.message;
+        setFormError(
+          Array.isArray(message)
+            ? message.join(', ')
+            : message || 'Could not create room. Please try again.',
+        );
+      } else {
+        setFormError('Could not create room. Please try again.');
+      }
     } finally {
       setSaving(false);
     }
@@ -213,58 +156,81 @@ function Rooms() {
 
   const openStatusModal = (room: Room) => {
     setSelectedRoom(room);
-    setStatusError("");
+    setNewStatus(room.status?.toLowerCase() === 'closed' ? 'closed' : 'open');
+    setFormError('');
+    setError('');
+    setSuccessMessage('');
+    setShowStatusModal(true);
   };
 
   const closeStatusModal = () => {
-    if (updatingStatus) return;
+    if (saving) return;
 
+    setShowStatusModal(false);
     setSelectedRoom(null);
-    setStatusError("");
+    setFormError('');
   };
 
-  const handleChangeStatus = async (status: RoomStatus) => {
-    if (!selectedRoom || updatingStatus) return;
+  const handleChangeStatus = async (
+    event: FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
 
-    if (selectedRoom.status === status) {
-      setStatusError(`This room is already ${status}.`);
+    if (!selectedRoom) {
+      setFormError('Please select a room first.');
       return;
     }
 
-    setUpdatingStatus(true);
-    setStatusError("");
-    setPageError("");
-    setSuccessMessage("");
+    if (newStatus === selectedRoom.status?.toLowerCase()) {
+      setFormError('Please select a different status.');
+      return;
+    }
+
+    setSaving(true);
+    setFormError('');
+    setError('');
+    setSuccessMessage('');
 
     try {
-      await axiosClient.patch("/room/changeStatus", {
+      await axiosClient.patch('/room/changeStatus', {
         number: selectedRoom.number,
-        status,
+        status: newStatus,
       });
 
-      const roomNumber = selectedRoom.number;
-
-      setSelectedRoom(null);
+      setShowStatusModal(false);
       setSuccessMessage(
-        `Room ${roomNumber} is now ${status}.`,
+        `Room ${selectedRoom.number} status changed to ${newStatus}.`,
       );
+      setSelectedRoom(null);
 
       await fetchRooms();
-    } catch (error: unknown) {
-      console.error("Failed to change room status:", error);
-      setStatusError(
-        getErrorMessage(error, "Failed to update room status."),
-      );
+    } catch (err: unknown) {
+      console.error('Failed to change room status:', err);
+
+      if (axios.isAxiosError(err)) {
+        const message = err.response?.data?.message;
+        setFormError(
+          Array.isArray(message)
+            ? message.join(', ')
+            : message || 'Could not change room status. Please try again.',
+        );
+      } else {
+        setFormError('Could not change room status. Please try again.');
+      }
     } finally {
-      setUpdatingStatus(false);
+      setSaving(false);
     }
   };
 
-  const isRoomOpen = (status: string) => status === "open";
+  const handleRoomClick = (room: Room) => {
+    navigate(`/rooms/${room.id}/people`, {
+      state: { roomNumber: room.number },
+    });
+  };
 
   return (
     <div className="rooms-page">
-      <header className="rooms-page-header">
+      <div className="rooms-page-header">
         <div>
           <h1>Rooms</h1>
           <p>Manage and monitor gallery rooms</p>
@@ -273,82 +239,76 @@ function Rooms() {
         <button
           type="button"
           className="rooms-add-button"
-          onClick={openAddModal}
+          onClick={() => {
+            setFormError('');
+            setError('');
+            setSuccessMessage('');
+            setShowAddModal(true);
+          }}
         >
           + Add Room
         </button>
-      </header>
+      </div>
 
-      {pageError && (
-        <div className="rooms-alert rooms-alert-error">
-          {pageError}
-          <button
-            type="button"
-            onClick={() => void fetchRooms()}
-          >
+      {error && (
+        <div className="rooms-alert rooms-alert-error" role="alert">
+          <span>{error}</span>
+          <button type="button" onClick={() => void fetchRooms()}>
             Retry
           </button>
         </div>
       )}
 
       {successMessage && (
-        <div className="rooms-alert rooms-alert-success">
-          {successMessage}
+        <div className="rooms-alert rooms-alert-success" role="status">
+          <span>{successMessage}</span>
           <button
             type="button"
-            aria-label="Dismiss message"
-            onClick={() => setSuccessMessage("")}
+            onClick={() => setSuccessMessage('')}
+            aria-label="Dismiss success message"
           >
             ×
           </button>
         </div>
       )}
 
-      <section className="rooms-stats">
+      <div className="rooms-stats">
         <div className="rooms-stat-card">
-          <div className="rooms-stat-icon rooms-stat-icon-blue">
-            🚪
-          </div>
+          <div className="rooms-stat-icon rooms-stat-icon-blue">🚪</div>
           <div>
             <p>Total Rooms</p>
-            <h2>{totalRooms}</h2>
+            <h2>{loading ? '—' : totalRooms}</h2>
           </div>
         </div>
 
         <div className="rooms-stat-card">
-          <div className="rooms-stat-icon rooms-stat-icon-green">
-            👥
-          </div>
+          <div className="rooms-stat-icon rooms-stat-icon-green">👥</div>
           <div>
             <p>People in Rooms</p>
-            <h2>{totalPeople}</h2>
+            <h2>{loading ? '—' : totalPeople}</h2>
           </div>
         </div>
 
         <div className="rooms-stat-card">
-          <div className="rooms-stat-icon rooms-stat-icon-orange">
-            🏛️
-          </div>
+          <div className="rooms-stat-icon rooms-stat-icon-orange">🏛️</div>
           <div>
             <p>Open Rooms</p>
-            <h2>{openRooms}</h2>
+            <h2>{loading ? '—' : openRooms}</h2>
           </div>
         </div>
-      </section>
+      </div>
 
       <section className="rooms-table-card">
         <div className="rooms-table-header">
           <h2>Gallery Rooms</h2>
-          <span>
-            {totalRooms} {totalRooms === 1 ? "room" : "rooms"}
-          </span>
+          <span>{loading ? 'Loading...' : `${totalRooms} rooms`}</span>
         </div>
 
         {loading ? (
           <div className="rooms-empty-state">Loading rooms...</div>
         ) : rooms.length === 0 ? (
           <div className="rooms-empty-state">
-            No rooms found. Select “Add Room” to create one.
+            No rooms found. Click Add Room to create one.
           </div>
         ) : (
           <div className="rooms-table-wrapper">
@@ -364,71 +324,75 @@ function Rooms() {
               </thead>
 
               <tbody>
-                {rooms.map((room) => (
-                  <tr key={room.id || room.number}>
-                    <td>
-                      <div className="rooms-room-cell">
-                        <div className="rooms-room-icon">🚪</div>
-                        <strong>Room {room.number}</strong>
-                      </div>
-                    </td>
+                {rooms.map((room) => {
+                  const isOpen =
+                    room.status?.toLowerCase() === 'open';
 
-                    <td>
-                      <span className="rooms-people-count">
-                        👥 {room.people}
-                      </span>
-                    </td>
+                  return (
+                    <tr key={room.id}>
+                      <td>
+                        <button
+                          type="button"
+                          className="rooms-room-link"
+                          onClick={() => handleRoomClick(room)}
+                        >
+                          <span className="rooms-room-icon">🚪</span>
+                          <span>Room {room.number}</span>
+                          <span className="rooms-room-link-icon">↗</span>
+                        </button>
+                      </td>
 
-                    <td>{room.occupancy}</td>
+                      <td>{Number(room.people) || 0}</td>
+                      <td>{Number(room.occupancy) || 0}</td>
 
-                    <td>
-                      <span
-                        className={`rooms-status-badge ${
-                          isRoomOpen(room.status)
-                            ? "rooms-status-open"
-                            : "rooms-status-closed"
-                        }`}
-                      >
-                        {room.status}
-                      </span>
-                    </td>
+                      <td>
+                        <span
+                          className={`rooms-status-badge ${
+                            isOpen
+                              ? 'rooms-status-open'
+                              : 'rooms-status-closed'
+                          }`}
+                        >
+                          {room.status || 'Unknown'}
+                        </span>
+                      </td>
 
-                    <td>
-                      <button
-                        type="button"
-                        className="rooms-change-status-button"
-                        onClick={() => openStatusModal(room)}
-                      >
-                        Change Status
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      <td>
+                        <button
+                          type="button"
+                          className="rooms-change-status-button"
+                          onClick={() => openStatusModal(room)}
+                        >
+                          Change Status
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
       </section>
 
-      {isAddModalOpen && (
+      {/* Add Room modal — stays on the Rooms page */}
+      {showAddModal && (
         <div
           className="room-modal-overlay"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              closeAddModal();
-            }
+            if (event.target === event.currentTarget) closeAddModal();
           }}
         >
           <section
             className="room-modal"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="room-modal-title"
+            aria-labelledby="add-room-title"
           >
             <div className="room-modal-header">
               <div>
-                <h2 id="room-modal-title">Add New Room</h2>
-                <p>Create a room for your gallery.</p>
+                <h2 id="add-room-title">Add New Room</h2>
+                <p>Enter the room number and maximum occupancy.</p>
               </div>
 
               <button
@@ -436,7 +400,7 @@ function Rooms() {
                 className="room-modal-close"
                 onClick={closeAddModal}
                 disabled={saving}
-                aria-label="Close"
+                aria-label="Close form"
               >
                 ×
               </button>
@@ -447,41 +411,37 @@ function Rooms() {
                 <label htmlFor="room-number">Room Number</label>
                 <input
                   id="room-number"
-                  name="number"
                   type="number"
-                  min={100}
-                  max={999}
-                  step={1}
-                  placeholder="e.g. 106"
-                  value={form.number}
-                  onChange={handleFormChange}
+                  min="1"
+                  step="1"
+                  value={roomNumber}
+                  onChange={(event) => setRoomNumber(event.target.value)}
+                  placeholder="e.g. 101"
                   required
+                  autoFocus
                 />
               </div>
 
               <div className="room-form-group">
-                <label htmlFor="room-occupancy">
-                  Maximum Capacity
-                </label>
+                <label htmlFor="room-occupancy">Maximum Occupancy</label>
                 <input
                   id="room-occupancy"
-                  name="occupancy"
                   type="number"
-                  min={1}
-                  step={1}
-                  placeholder="e.g. 50"
-                  value={form.occupancy}
-                  onChange={handleFormChange}
+                  min="1"
+                  step="1"
+                  value={occupancy}
+                  onChange={(event) => setOccupancy(event.target.value)}
+                  placeholder="e.g. 20"
                   required
                 />
                 <p className="room-form-hint">
-                  Maximum number of people allowed in this room.
+                  Enter the maximum number of people allowed in this room.
                 </p>
               </div>
 
               <div className="room-form-info">
-                New rooms start with 0 people. The backend
-                determines the initial room status.
+                The new room will be created with its default status and
+                occupancy count as configured by the backend.
               </div>
 
               {formError && (
@@ -499,13 +459,12 @@ function Rooms() {
                 >
                   Cancel
                 </button>
-
                 <button
                   type="submit"
                   className="room-button room-button-primary"
                   disabled={saving}
                 >
-                  {saving ? "Creating..." : "Create Room"}
+                  {saving ? 'Adding...' : 'Add Room'}
                 </button>
               </div>
             </form>
@@ -513,98 +472,88 @@ function Rooms() {
         </div>
       )}
 
-      {selectedRoom && (
+      {/* Change Status modal */}
+      {showStatusModal && selectedRoom && (
         <div
           className="room-modal-overlay"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              closeStatusModal();
-            }
+            if (event.target === event.currentTarget) closeStatusModal();
           }}
         >
           <section
-            className="room-status-modal"
+            className="room-modal"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="room-status-title"
+            aria-labelledby="change-status-title"
           >
-            <div className="room-status-header">
+            <div className="room-modal-header">
               <div>
-                <h2 id="room-status-title">Change Room Status</h2>
-                <p>Room {selectedRoom.number}</p>
+                <h2 id="change-status-title">Change Room Status</h2>
+                <p>Update the status of this gallery room.</p>
               </div>
 
               <button
                 type="button"
                 className="room-modal-close"
                 onClick={closeStatusModal}
-                disabled={updatingStatus}
-                aria-label="Close"
+                disabled={saving}
+                aria-label="Close form"
               >
                 ×
               </button>
             </div>
 
-            <div className="room-status-current">
-              Current status
-              <span
-                className={`rooms-status-badge ${
-                  isRoomOpen(selectedRoom.status)
-                    ? "rooms-status-open"
-                    : "rooms-status-closed"
-                }`}
-              >
-                {selectedRoom.status}
-              </span>
-            </div>
+            <form onSubmit={handleChangeStatus}>
+              <div className="room-form-group">
+                <label htmlFor="selected-room">Room Number</label>
+                <input
+                  id="selected-room"
+                  type="text"
+                  value={`Room ${selectedRoom.number}`}
+                  readOnly
+                />
+              </div>
 
-            {selectedRoom.people > 0 &&
-              selectedRoom.status === "open" && (
-                <p className="room-status-warning">
-                  This room currently has {selectedRoom.people}{" "}
-                  {selectedRoom.people === 1 ? "person" : "people"}.
-                  Check that the room is empty before closing it.
-                </p>
+              <div className="room-form-group">
+                <label htmlFor="room-status">New Status</label>
+                <select
+                  id="room-status"
+                  value={newStatus}
+                  onChange={(event) => setNewStatus(event.target.value)}
+                  required
+                >
+                  <option value="open">Open</option>
+                  <option value="closed">Closed</option>
+                </select>
+              </div>
+
+              {formError && (
+                <div className="room-form-error" role="alert">
+                  {formError}
+                </div>
               )}
 
-            {statusError && (
-              <div className="room-form-error" role="alert">
-                {statusError}
+              <div className="room-modal-footer">
+                <button
+                  type="button"
+                  className="room-button room-button-secondary"
+                  onClick={closeStatusModal}
+                  disabled={saving}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="room-button room-button-primary"
+                  disabled={
+                    saving ||
+                    newStatus === selectedRoom.status?.toLowerCase()
+                  }
+                >
+                  {saving ? 'Saving...' : 'Save Status'}
+                </button>
               </div>
-            )}
-
-            <div className="room-status-actions">
-              <button
-                type="button"
-                className="room-status-open-button"
-                disabled={
-                  updatingStatus || selectedRoom.status === "open"
-                }
-                onClick={() => void handleChangeStatus("open")}
-              >
-                {updatingStatus ? "Updating..." : "Open Room"}
-              </button>
-
-              <button
-                type="button"
-                className="room-status-close-button"
-                disabled={
-                  updatingStatus || selectedRoom.status === "closed"
-                }
-                onClick={() => void handleChangeStatus("closed")}
-              >
-                {updatingStatus ? "Updating..." : "Close Room"}
-              </button>
-
-              <button
-                type="button"
-                className="room-status-cancel-button"
-                disabled={updatingStatus}
-                onClick={closeStatusModal}
-              >
-                Cancel
-              </button>
-            </div>
+            </form>
           </section>
         </div>
       )}

@@ -1,4 +1,4 @@
-import { Body, Controller, Param, ParseUUIDPipe, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Req, UseGuards } from '@nestjs/common';
 import { GalleryEventsService } from './gallery_events.service';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Role } from '../../commons/enum/roles.enum';
@@ -57,6 +57,19 @@ export class GalleryEventsController {
     async leaveRoom(@Body() event: EventRoomDto, @Req() req: any) {
         try {
             return await this.galleryEventService.leaveRoom(event.email, event.room_number, req.userId);
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    @Get('events/room/people/:id')
+    @Roles(Role.admin, Role.employee)
+    @UseGuards(RolesGuard)
+    @ApiBearerAuth()
+    async getPersonsInRoom( @Param('id', ParseUUIDPipe) id: string) {
+        try {
+            return await this.galleryEventService.getPeopleInRoom(id);
         } catch (error) {
             console.log(error);
             throw error;

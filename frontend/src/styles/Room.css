@@ -3,6 +3,8 @@
 ========================= */
 
 .rooms-page {
+    width: 100%;
+    min-width: 0;
     padding: 24px;
     color: #1e344b;
     font-family: Georgia, 'Times New Roman', serif;
@@ -14,10 +16,7 @@
     box-sizing: border-box;
 }
 
-/* =========================
-     Header
-  ========================= */
-
+/* Header */
 .rooms-page-header {
     display: flex;
     justify-content: space-between;
@@ -28,15 +27,17 @@
 
 .rooms-page-header h1 {
     margin: 0;
+    color: #1e344b;
     font-size: 28px;
     font-weight: 700;
-    color: #1e344b;
+    line-height: 1.25;
 }
 
 .rooms-page-header p {
     margin: 6px 0 0;
     color: #71839b;
     font-size: 14px;
+    line-height: 1.5;
 }
 
 .rooms-add-button {
@@ -45,22 +46,25 @@
     border: none;
     border-radius: 7px;
     background: #1769e8;
-    color: white;
+    color: #fff;
     font-family: inherit;
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
 }
 
 .rooms-add-button:hover {
     background: #1256c5;
 }
 
-/* =========================
-     Alerts
-  ========================= */
+.rooms-add-button:active {
+    transform: translateY(1px);
+}
 
+/* Alerts */
 .rooms-alert {
     display: flex;
     align-items: center;
@@ -71,6 +75,7 @@
     border: 1px solid;
     border-radius: 8px;
     font-size: 14px;
+    line-height: 1.5;
 }
 
 .rooms-alert-error {
@@ -94,13 +99,10 @@
     cursor: pointer;
 }
 
-/* =========================
-     Statistics
-  ========================= */
-
+/* Statistics */
 .rooms-stats {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px;
     margin-bottom: 24px;
 }
@@ -109,10 +111,11 @@
     display: flex;
     align-items: center;
     gap: 14px;
+    min-width: 0;
     padding: 18px;
-    background: white;
     border: 1px solid #ddd;
     border-radius: 8px;
+    background: #fff;
 }
 
 .rooms-stat-card p {
@@ -125,17 +128,16 @@
     margin: 0;
     color: #1e344b;
     font-size: 24px;
+    line-height: 1.25;
 }
 
-/* Statistic icons */
-
 .rooms-stat-icon {
-    width: 42px;
-    height: 42px;
     display: flex;
-    flex-shrink: 0;
+    flex: 0 0 42px;
     align-items: center;
     justify-content: center;
+    width: 42px;
+    height: 42px;
     border-radius: 8px;
     font-size: 20px;
 }
@@ -152,48 +154,46 @@
     background: #fff3e0;
 }
 
-/* =========================
-     Rooms Section
-  ========================= */
-
+/* Rooms section */
 .rooms-table-card {
-    background: white;
+    overflow: hidden;
     border: 1px solid #ddd;
     border-radius: 8px;
-    overflow: hidden;
+    background: #fff;
 }
 
 .rooms-table-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
     padding: 18px;
     border-bottom: 1px solid #ddd;
 }
 
 .rooms-table-header h2 {
     margin: 0;
-    font-size: 18px;
     color: #1e344b;
+    font-size: 18px;
 }
 
 .rooms-table-header span {
     color: #666;
     font-size: 14px;
+    white-space: nowrap;
 }
 
-/* =========================
-     Table
-  ========================= */
-
+/* Table */
 .rooms-table-wrapper {
     width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .rooms-table {
     width: 100%;
     border-collapse: collapse;
+    border-spacing: 0;
 }
 
 .rooms-table th,
@@ -201,6 +201,7 @@
     padding: 14px 16px;
     text-align: left;
     border-bottom: 1px solid #eee;
+    vertical-align: middle;
 }
 
 .rooms-table th {
@@ -212,8 +213,8 @@
 }
 
 .rooms-table td {
-    font-size: 14px;
     color: #5f738c;
+    font-size: 14px;
 }
 
 .rooms-table tbody tr:hover {
@@ -224,16 +225,13 @@
     border-bottom: none;
 }
 
-/* =========================
-     Room
-  ========================= */
-
+/* Room name and icon */
 .rooms-room-cell {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-weight: 500;
     min-width: 130px;
+    font-weight: 500;
 }
 
 .rooms-room-cell strong {
@@ -243,25 +241,62 @@
 }
 
 .rooms-room-icon {
-    width: 38px;
-    height: 38px;
     display: flex;
-    flex-shrink: 0;
+    flex: 0 0 38px;
     align-items: center;
     justify-content: center;
+    width: 38px;
+    height: 38px;
     border-radius: 8px;
     background: #e8f0ff;
     font-size: 18px;
+}
+
+/* Clickable room name */
+.rooms-room-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+    border: 0;
+    background: transparent;
+    color: #29415a;
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.rooms-room-link:hover {
+    color: #1769e8;
+    text-decoration: underline;
+}
+
+.rooms-room-link:focus-visible {
+    outline: 2px solid #1769e8;
+    outline-offset: 3px;
+    border-radius: 3px;
+}
+
+.rooms-room-link-icon {
+    color: #1769e8;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.rooms-room-link:hover .rooms-room-link-icon,
+.rooms-room-link:focus-visible .rooms-room-link-icon {
+    opacity: 1;
 }
 
 .rooms-people-count {
     white-space: nowrap;
 }
 
-/* =========================
-     Status
-  ========================= */
-
+/* Status */
 .rooms-status-badge {
     display: inline-block;
     padding: 4px 10px;
@@ -269,6 +304,7 @@
     font-size: 12px;
     font-weight: 600;
     text-transform: lowercase;
+    white-space: nowrap;
 }
 
 .rooms-status-open {
@@ -281,43 +317,41 @@
     color: #c62828;
 }
 
-/* =========================
-     Action
-  ========================= */
-
+/* Action */
 .rooms-change-status-button {
     padding: 6px 12px;
     border: 1px solid #ccc;
-    background: white;
     border-radius: 5px;
-    cursor: pointer;
+    background: #fff;
+    color: #1769e8;
     font-family: inherit;
     font-size: 13px;
     white-space: nowrap;
-    color: #1769e8;
-    transition: background 0.2s ease;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
 }
 
 .rooms-change-status-button:hover {
-    background: #f5f5f5;
     border-color: #1769e8;
+    background: #f5f8ff;
 }
 
-/* =========================
-     Loading / Error
-  ========================= */
+.rooms-change-status-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
 
+/* Empty / loading state */
 .rooms-empty-state {
     padding: 30px;
-    text-align: center;
     color: #666;
     font-size: 14px;
+    text-align: center;
 }
 
-/* =========================
-     Modal Overlay
-  ========================= */
-
+/* Modal overlay */
 .room-modal-overlay {
     position: fixed;
     inset: 0;
@@ -329,12 +363,10 @@
     padding: 20px;
     background: rgb(15 23 42 / 45%);
     backdrop-filter: blur(3px);
+    animation: room-modal-fade-in 0.18s ease-out;
 }
 
-/* =========================
-     Add Room Modal
-  ========================= */
-
+/* Add room / change status modal */
 .room-modal {
     width: 100%;
     max-width: 680px;
@@ -343,8 +375,9 @@
     padding: 32px;
     border: 1px solid #d8e1ec;
     border-radius: 12px;
-    background: white;
+    background: #fff;
     box-shadow: 0 20px 50px rgb(15 23 42 / 18%);
+    animation: room-modal-appear 0.22s ease-out;
 }
 
 .room-modal-header {
@@ -371,7 +404,7 @@
 
 .room-modal-close {
     display: flex;
-    flex-shrink: 0;
+    flex: 0 0 42px;
     align-items: center;
     justify-content: center;
     width: 42px;
@@ -383,6 +416,7 @@
     font-family: Arial, sans-serif;
     font-size: 27px;
     cursor: pointer;
+    transition: background 0.2s ease;
 }
 
 .room-modal-close:hover {
@@ -394,6 +428,7 @@
     opacity: 0.5;
 }
 
+/* Form */
 .room-form-group {
     display: flex;
     flex-direction: column;
@@ -407,22 +442,33 @@
     font-weight: 700;
 }
 
-.room-form-group input {
+.room-form-group input,
+.room-form-group select {
     width: 100%;
     min-height: 50px;
     padding: 12px 14px;
     border: 1px solid #cbd7e6;
     border-radius: 7px;
     outline: none;
-    background: white;
+    background: #fff;
     color: #1e3a5f;
     font-family: inherit;
     font-size: 17px;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
-.room-form-group input:focus {
+.room-form-group input:focus,
+.room-form-group select:focus {
     border-color: #1769e8;
     box-shadow: 0 0 0 3px rgb(23 105 232 / 10%);
+}
+
+.room-form-group input:disabled,
+.room-form-group select:disabled {
+    background: #f8fafc;
+    cursor: not-allowed;
 }
 
 .room-form-hint {
@@ -454,6 +500,7 @@
     line-height: 1.5;
 }
 
+/* Modal buttons */
 .room-modal-footer {
     display: flex;
     justify-content: flex-end;
@@ -472,6 +519,9 @@
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
+    transition:
+        background 0.2s ease,
+        opacity 0.2s ease;
 }
 
 .room-button:disabled {
@@ -481,7 +531,7 @@
 
 .room-button-secondary {
     border-color: #cbd5e1;
-    background: white;
+    background: #fff;
     color: #475569;
 }
 
@@ -492,162 +542,67 @@
 .room-button-primary {
     min-width: 140px;
     background: #1769e8;
-    color: white;
+    color: #fff;
 }
 
 .room-button-primary:hover:not(:disabled) {
     background: #1256c5;
 }
 
-/* =========================
-     Change Status Modal
-  ========================= */
+/* Modal animations */
+@keyframes room-modal-fade-in {
+    from {
+        opacity: 0;
+    }
 
-.room-status-modal {
-    width: 100%;
-    max-width: 420px;
-    padding: 24px;
-    border: 1px solid #d8e1ec;
-    border-radius: 12px;
-    background: white;
-    box-shadow: 0 20px 50px rgb(15 23 42 / 18%);
-}
-
-.room-status-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 14px;
-    margin-bottom: 20px;
-}
-
-.room-status-header h2 {
-    margin: 0;
-    color: #1e3a5f;
-    font-size: 22px;
-    line-height: 1.3;
-}
-
-.room-status-header p {
-    margin: 7px 0 0;
-    color: #647793;
-    font-size: 14px;
-}
-
-.room-status-modal .room-modal-close {
-    width: 36px;
-    height: 36px;
-    font-size: 24px;
-}
-
-.room-status-current {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 0;
-    border-top: 1px solid #e2e8f0;
-    border-bottom: 1px solid #e2e8f0;
-    color: #647793;
-    font-size: 14px;
-}
-
-.room-status-warning {
-    margin: 14px 0 0;
-    padding: 12px;
-    border: 1px solid #fde68a;
-    border-radius: 7px;
-    background: #fffbeb;
-    color: #92400e;
-    font-size: 13px;
-    line-height: 1.5;
-}
-
-.room-status-modal .room-form-error {
-    margin-top: 14px;
-    padding: 12px;
-    font-size: 13px;
-}
-
-.room-status-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.room-status-actions button {
-    width: 100%;
-    min-height: 40px;
-    padding: 10px 14px;
-    border: 1px solid transparent;
-    border-radius: 7px;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.room-status-actions button:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-.room-status-open-button {
-    border-color: #bbf7d0 !important;
-    background: #dcfce7;
-    color: #15803d;
-}
-
-.room-status-open-button:hover:not(:disabled) {
-    background: #bbf7d0;
-}
-
-.room-status-close-button {
-    border-color: #fecaca !important;
-    background: #fee2e2;
-    color: #b91c1c;
-}
-
-.room-status-close-button:hover:not(:disabled) {
-    background: #fecaca;
-}
-
-.room-status-cancel-button {
-    border-color: #cbd5e1 !important;
-    background: white;
-    color: #475569;
-}
-
-.room-status-cancel-button:hover:not(:disabled) {
-    background: #f1f5f9;
-}
-
-/* =========================
-     Tablet
-  ========================= */
-
-@media (max-width: 900px) {
-    .rooms-stats {
-        grid-template-columns: repeat(2, 1fr);
+    to {
+        opacity: 1;
     }
 }
 
-/* =========================
-     Mobile
-  ========================= */
+@keyframes room-modal-appear {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.99);
+    }
 
-@media (max-width: 768px) {
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Responsive layout */
+@media (max-width: 900px) {
     .rooms-page {
-        padding: 16px;
+        padding: 20px;
+    }
+
+    .rooms-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rooms-stat-card:last-child {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 600px) {
+    .rooms-page {
+        padding: 14px;
     }
 
     .rooms-page-header {
-        margin-bottom: 20px;
+        align-items: flex-start;
+        flex-direction: column;
     }
 
     .rooms-page-header h1 {
-        font-size: 24px;
+        font-size: 25px;
+    }
+
+    .rooms-add-button {
+        width: 100%;
     }
 
     .rooms-stats {
@@ -655,81 +610,75 @@
         gap: 12px;
     }
 
+    .rooms-stat-card:last-child {
+        grid-column: auto;
+    }
+
     .rooms-stat-card {
-        padding: 16px;
-    }
-
-    .rooms-table-header {
-        padding: 16px;
-    }
-
-    .rooms-table-header h2 {
-        font-size: 16px;
-    }
-
-    .rooms-table {
-        min-width: 700px;
-    }
-
-    .room-modal-overlay {
         padding: 14px;
     }
 
-    .room-modal {
-        max-height: calc(100vh - 28px);
-        padding: 22px;
+    .rooms-table-header {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 14px;
     }
 
-    .room-modal-header h2 {
-        font-size: 24px;
+    .rooms-table th,
+    .rooms-table td {
+        padding: 11px 12px;
+        font-size: 12px;
     }
 
-    .room-modal-header p {
-        font-size: 14px;
+    .rooms-room-cell {
+        min-width: 120px;
     }
-}
 
-/* =========================
-     Small Mobile
-  ========================= */
+    .rooms-room-icon {
+        flex-basis: 32px;
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
 
-@media (max-width: 480px) {
-    .rooms-page {
+    .room-modal-overlay {
+        align-items: flex-start;
         padding: 12px;
     }
 
-    .rooms-page-header h1 {
-        font-size: 22px;
+    .room-modal {
+        margin: auto 0;
+        padding: 22px 18px;
     }
 
-    .rooms-page-header p {
-        font-size: 13px;
+    .room-modal-header {
+        margin-bottom: 22px;
     }
 
-    .rooms-stat-card h2 {
-        font-size: 22px;
-    }
-
-    .rooms-stat-icon {
-        width: 38px;
-        height: 38px;
-        font-size: 18px;
-    }
-
-    .rooms-page-header {
-        align-items: flex-start;
-    }
-
-    .rooms-add-button {
-        padding: 9px 12px;
-        font-size: 13px;
+    .room-modal-header h2 {
+        font-size: 23px;
     }
 
     .room-modal-footer {
         flex-direction: column-reverse;
     }
 
-    .room-modal-footer .room-button {
+    .room-button {
         width: 100%;
+    }
+}
+
+/* Accessibility: reduce animations when requested */
+@media (prefers-reduced-motion: reduce) {
+    .room-modal-overlay,
+    .room-modal {
+        animation: none;
+    }
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
     }
 }

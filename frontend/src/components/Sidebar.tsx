@@ -14,13 +14,13 @@ const menuItems: MenuItem[] = [
     label: "Dashboard",
     path: "/dashboard",
     icon: "▣",
-    roles: ["Admin", "Employee", "User"],
+    roles: ["Admin", "User"],
   },
   {
     label: "Rooms",
     path: "/rooms",
     icon: "▤",
-    roles: ["Admin"],
+    roles: ["Admin", "Employee"],
   },
   {
     label: "People",
