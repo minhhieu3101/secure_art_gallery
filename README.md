@@ -16,25 +16,25 @@ The project follows the Build It, Break It, Fix It (BIBIFI) approach:
 
 ## 2. Team Members
 
-| Name           | Role      |
-| -------------- | --------- |
+| Name | Role |
+|---|---|
 | Minh Hieu Dang | Developer |
 
 ## 3. Technology Stack
 
-| Component                  | Technology                  |
-| -------------------------- | --------------------------- |
-| Frontend                   | ReactJS, TypeScript, CSS    |
-| Backend                    | NestJS, Node.js, TypeScript |
-| Database                   | PostgreSQL 16               |
-| Audit Logging              | C++                         |
-| API Communication          | REST API                    |
-| Authentication             | JWT and session management  |
-| Email Testing              | Mailtrap SMTP               |
-| Containerization           | Docker, Docker Compose      |
-| API Documentation          | Swagger / OpenAPI           |
-| API Testing                | Postman                     |
-| Web Server / Reverse Proxy | Nginx                       |
+| Component | Technology |
+|---|---|
+| Frontend | ReactJS, TypeScript, CSS |
+| Backend | NestJS, Node.js, TypeScript |
+| Database | PostgreSQL 16 |
+| Audit Logging | C++ |
+| API Communication | REST API |
+| Authentication | JWT and session management |
+| Email Testing | Mailtrap SMTP |
+| Containerization | Docker, Docker Compose |
+| API Documentation | Swagger / OpenAPI |
+| API Testing | Postman |
+| Web Server / Reverse Proxy | Nginx |
 
 ## 4. System Architecture
 
@@ -46,21 +46,21 @@ The application uses a client-server architecture.
              User / Browser
                    |
                    v
-          React Frontend
+            React Frontend
                    |
                    v
-             Nginx Server
+              Nginx Server
                    |
-            /api/ requests
+              /api/ requests
                    |
                    v
-           NestJS Backend
-             /         \
-            v           v
-      PostgreSQL    C++ Audit
-       Database     Component
-                        |
-                   Audit Records
+             NestJS Backend
+               /         \
+              v           v
+        PostgreSQL     C++ Audit
+         Database      Component
+                           |
+                     Audit Records
 ```
 
 ### Main Components
@@ -109,11 +109,11 @@ The application uses a client-server architecture.
 
 The application uses role-based access control (RBAC).
 
-| Role          | Main Permissions                                                                |
-| ------------- | ------------------------------------------------------------------------------- |
-| User / Guest  | Log in and access information permitted by the application.                     |
-| Employee      | Record authorized gallery and room activities and access permitted information. |
-| Administrator | Manage users, roles, rooms, and administrative information; view audit logs.    |
+| Role | Main Permissions |
+|---|---|
+| User / Guest | Log in and access information permitted by the application. |
+| Employee | Record authorized gallery and room activities and access permitted information. |
+| Administrator | Manage users, roles, rooms, and administrative information; view audit logs. |
 
 Authorization must be enforced by the backend. Frontend visibility restrictions alone are not sufficient to protect API endpoints.
 
@@ -130,15 +130,13 @@ Install the following tools:
 ### Step 1: Clone the Repository
 
 ```bash
-git clone <repository-url>
-cd secure-art-gallery
+git clone https://github.com/minhhieu3101/secure_art_gallery.git
+cd secure_art_gallery
 ```
-
-Replace `<repository-url>` with the actual GitHub repository URL.
 
 ### Step 2: Configure Environment Variables
 
-Create a `.env` file in the project root or in the location expected by `compose.yaml`.
+Create a `.env` file in the project root.
 
 Example configuration:
 
@@ -168,11 +166,17 @@ The `.env.example` file provides an example of the required environment variable
 
 ### Step 3: Build and Start the Application
 
-Run:
+Run the following command from the project root:
 
 ```bash
 docker compose up --build -d
 ```
+
+This command builds and starts the application services:
+
+- PostgreSQL database
+- NestJS backend
+- React frontend with Nginx
 
 Check the running containers:
 
@@ -188,16 +192,29 @@ docker compose logs -f
 
 ### Step 4: Access the Application
 
-When using the default Docker port configuration:
+After starting the application successfully, open your web browser and navigate directly to the Login page:
 
-| Service     | Address                                         |
-| ----------- | ----------------------------------------------- |
-| Frontend    | http://localhost:8080                           |
-| Swagger UI  | http://localhost:8080/api/api                   |
-| PostgreSQL  | localhost:5432                                  |
-| Backend API | Access through the frontend Nginx `/api/` proxy |
+**Login Page:**
+
+http://localhost:8080/login
+
+The following services are available:
+
+| Service | Address |
+|---|---|
+| Frontend / Login Page | http://localhost:8080/login |
+| Frontend Home | http://localhost:8080 |
+| Swagger UI | http://localhost:8080/api/api |
+| PostgreSQL | localhost:5432 |
 
 The backend container listens on port `3000` inside the Docker network. It is accessed through the Nginx reverse proxy.
+
+**To log in:**
+
+1. Open http://localhost:8080/login.
+2. Enter your account credentials.
+3. Click the Login button.
+4. After successful authentication, access the features permitted by your user role.
 
 ### Stop the Application
 
@@ -247,6 +264,8 @@ database/schema.sql
 
 This file contains the SQL schema used to describe the database structure, including tables, columns, and relationships.
 
+The Docker Compose configuration mounts this schema file into the PostgreSQL initialization directory. PostgreSQL executes initialization scripts when creating a new database volume.
+
 Use the schema file as a reference when setting up or reviewing the database.
 
 ## 9. API Endpoints
@@ -255,14 +274,14 @@ The backend provides REST API endpoints for authentication, dashboard informatio
 
 The following are known API examples:
 
-| Method | Endpoint                    | Description                         |
-| ------ | --------------------------- | ----------------------------------- |
-| POST   | `/api/auth/login`           | Authenticate a user                 |
-| POST   | `/api/auth/refresh`         | Refresh authentication credentials  |
-| GET    | `/api/dashboard/room`       | Retrieve room dashboard information |
-| GET    | `/api/dashboard/log`        | Retrieve dashboard activity logs    |
-| GET    | `/api/dashboard/user`       | Retrieve user dashboard information |
-| POST   | `/api/events/gallery/enter` | Record a gallery entry event        |
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/auth/login` | Authenticate a user |
+| POST | `/api/auth/refresh` | Refresh authentication credentials |
+| GET | `/api/dashboard/room` | Retrieve room dashboard information |
+| GET | `/api/dashboard/log` | Retrieve dashboard activity logs |
+| GET | `/api/dashboard/user` | Retrieve user dashboard information |
+| POST | `/api/events/gallery/enter` | Record a gallery entry event |
 
 The `/api/` prefix is handled by Nginx and forwarded to the backend. The backend route itself may not include this prefix.
 
@@ -278,16 +297,16 @@ Swagger UI allows developers and testers to explore available API endpoints, rev
 
 1. Start the application using Docker Compose:
 
-    ```bash
-    docker compose up --build -d
-    ```
+   ```bash
+   docker compose up --build -d
+   ```
 
 2. Open a web browser.
-3. Navigate to the Swagger UI URL:
+3. Navigate to:
 
-    ```text
-    http://localhost:8080/api/api
-    ```
+   ```text
+   http://localhost:8080/api/api
+   ```
 
 The Swagger path is configured in the NestJS application using `SwaggerModule.setup('api', app, document)`. Nginx forwards requests under `/api/` to the backend.
 
@@ -304,7 +323,7 @@ The Swagger path is configured in the NestJS application using `SwaggerModule.se
 
 The application configures Bearer authentication in Swagger.
 
-For protected endpoints, click **Authorize** and enter a valid access token.
+For protected endpoints, click **Authorize** and enter a valid access token:
 
 ```text
 Bearer <access_token>
@@ -349,16 +368,16 @@ Swagger UI is also available for exploring and executing API requests.
 
 ### Security Testing Areas
 
-| Test Area        | Testing Objective                                                 |
-| ---------------- | ----------------------------------------------------------------- |
-| Authentication   | Verify valid and invalid login attempts.                          |
-| Input Validation | Verify that invalid or missing input is rejected.                 |
-| SQL Injection    | Check whether malicious input can affect database queries.        |
-| Authorization    | Verify that users cannot access administrator-only resources.     |
-| Token Security   | Test missing, invalid, and expired authentication tokens.         |
-| Room Validation  | Verify that invalid room data is rejected.                        |
-| Business Logic   | Verify that gallery and room events follow the required sequence. |
-| Audit Logging    | Verify that important activities are recorded and protected.      |
+| Test Area | Testing Objective |
+|---|---|
+| Authentication | Verify valid and invalid login attempts. |
+| Input Validation | Verify that invalid or missing input is rejected. |
+| SQL Injection | Check whether malicious input can affect database queries. |
+| Authorization | Verify that users cannot access administrator-only resources. |
+| Token Security | Test missing, invalid, and expired authentication tokens. |
+| Room Validation | Verify that invalid room data is rejected. |
+| Business Logic | Verify that gallery and room events follow the required sequence. |
+| Audit Logging | Verify that important activities are recorded and protected. |
 
 ### Running Tests with Postman
 
@@ -367,9 +386,9 @@ Swagger UI is also available for exploring and executing API requests.
 3. Import the project's Postman collection.
 4. Configure the `baseURL` environment variable as:
 
-    ```text
-    http://localhost:8080/api
-    ```
+   ```text
+   http://localhost:8080/api
+   ```
 
 5. Run the login request to obtain authentication credentials.
 6. Save the access token in the Postman environment when the login response provides it.
