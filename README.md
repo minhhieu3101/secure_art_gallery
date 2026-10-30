@@ -1,118 +1,429 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Secure Art Gallery
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A secure web-based application for managing visitors, employees, gallery access, and room occupancy. The system records gallery and room activities, manages user permissions, and maintains audit logs to support accountability and security monitoring.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 1. Project Purpose
 
-## Description
+The Secure Art Gallery Web Application is developed as part of the CS 4/53401 – Secure Programming BIBIFI Project.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+The application is designed to manage people entering and leaving an art gallery and individual rooms. It provides authentication, role-based access control, event management, occupancy tracking, and audit logging.
 
-## Project setup
+The project follows the Build It, Break It, Fix It (BIBIFI) approach:
 
-```bash
-$ npm install
+- **Build It:** Design and implement a functional and secure application.
+- **Break It:** Test the application to identify security vulnerabilities and functional defects.
+- **Fix It:** Correct identified issues and verify the security improvements.
+
+## 2. Team Members
+
+| Name            | Role      |
+| --------------- | --------- |
+| [Team Member 1] | Developer |
+| [Team Member 2] | Developer |
+
+## 3. Technology Stack
+
+| Component                  | Technology                  |
+| -------------------------- | --------------------------- |
+| Frontend                   | ReactJS, TypeScript, CSS    |
+| Backend                    | NestJS, Node.js, TypeScript |
+| Database                   | PostgreSQL 16               |
+| Audit Logging              | C++                         |
+| API Communication          | REST API                    |
+| Authentication             | JWT and session management  |
+| Email Testing              | Mailtrap SMTP               |
+| Containerization           | Docker, Docker Compose      |
+| API Testing                | Postman                     |
+| Web Server / Reverse Proxy | Nginx                       |
+
+## 4. System Architecture
+
+The application uses a client-server architecture.
+
+### Architecture Overview
+
+```text
+              User / Browser
+                    |
+                    v
+           React Frontend
+                    |
+                    v
+              Nginx Server
+                    |
+             /api/ requests
+                    |
+                    v
+            NestJS Backend
+              /         \
+             v           v
+       PostgreSQL    C++ Audit
+        Database     Component
+                         |
+                    Audit Records
 ```
 
-## Compile and run the project
+### Main Components
+
+**Frontend**
+
+- Provides the user interface.
+- Allows users to log in and access authorized features.
+- Supports gallery events, room management, and dashboard views.
+
+**Backend**
+
+- Handles API requests and business logic.
+- Performs authentication and authorization.
+- Validates input data.
+- Communicates with PostgreSQL and the C++ audit component.
+
+**Database**
+
+- Stores user accounts, sessions, rooms, gallery events, and audit records.
+
+**C++ Audit Component**
+
+- Provides `append()` for recording audit information.
+- Provides `read()` for retrieving audit information.
+
+**Nginx**
+
+- Serves the frontend application.
+- Forwards requests under `/api/` to the NestJS backend.
+
+## 5. Main Features
+
+- User authentication and session management.
+- Role-based access control.
+- User and employee management.
+- Gallery entry and exit event recording.
+- Room entry and exit event recording.
+- Room occupancy management.
+- Dashboard displaying room and activity information.
+- Administrative audit log access.
+- Audit logging through the C++ component.
+- Input validation and secure API handling.
+
+## 6. User Roles and Permissions
+
+The application uses role-based access control (RBAC).
+
+| Role          | Main Permissions                                                                |
+| ------------- | ------------------------------------------------------------------------------- |
+| User / Guest  | Log in and access information permitted by the application.                     |
+| Employee      | Record authorized gallery and room activities and access permitted information. |
+| Administrator | Manage users, roles, rooms, and administrative information; view audit logs.    |
+
+Authorization must be enforced by the backend. Frontend visibility restrictions alone are not sufficient to protect API endpoints.
+
+## 7. Installation and Configuration
+
+### Prerequisites
+
+Install the following tools:
+
+- Docker Desktop
+- Docker Compose
+- Git
+
+### Step 1: Clone the Repository
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone <repository-url>
+cd secure-art-gallery
 ```
 
-## Run tests
+Replace `<repository-url>` with the actual GitHub repository URL.
+
+### Step 2: Configure Environment Variables
+
+Create a `.env` file in the project root or in the location expected by `docker-compose.yml`.
+
+Example configuration:
+
+```env
+DB_HOST=db
+DB_PORT=5432
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_DATABASE=art_gallery_db
+
+DATABASE_URL=postgresql://your_db_user:your_db_password@db:5432/art_gallery_db
+
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USER=your_mailtrap_username
+MAIL_PASSWORD=your_mailtrap_password
+MAIL_FROM=artgallery@example.com
+
+JWT_SECRET=your_strong_jwt_secret
+JWT_ACCESS_TOKEN_EXPIRATION_TIME=336000s
+JWT_REFRESH_TOKEN_EXPIRATION_TIME=2d
+```
+
+Use your own credentials and strong secrets. Do not commit `.env` files or real credentials to GitHub.
+
+### Step 3: Build and Start the Application
+
+Run:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+docker compose up --build -d
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Check the running containers:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+docker compose ps
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+View application logs:
 
-## Observability
+```bash
+docker compose logs -f
+```
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+### Step 4: Access the Application
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+When using the default Docker port configuration:
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+| Service     | Address                                         |
+| ----------- | ----------------------------------------------- |
+| Frontend    | http://localhost:8080                           |
+| PostgreSQL  | localhost:5432                                  |
+| Backend API | Access through the frontend Nginx `/api/` proxy |
 
-This project is already instrumented. Create a free account at [observe.nestjs.com](https://observe.nestjs.com), add an application, and paste the generated app key and secret into the `ObserveModule.forRoot()` call in `src/app.module.ts`.
+The backend container listens on port `3000` inside the Docker network. It is not necessarily exposed directly to the host.
 
-The free plan needs no payment details and covers 300,000 events a month. You can also browse the [live demo](https://www.observe-demo.nestjs.com/dashboard) first - the whole dashboard over a busy service's data, with nothing to install.
+### Stop the Application
 
-## Resources
+```bash
+docker compose down
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+To stop the application and remove its containers and networks:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observe](https://observe.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+docker compose down
+```
 
-## Support
+Database data may be stored in a Docker volume. Do not remove volumes unless you intend to delete the persisted database data.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## 8. Database Setup
 
-## Stay in touch
+The application uses PostgreSQL 16 as its relational database.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+The database stores:
 
-## License
+- Users
+- Sessions
+- Rooms
+- Gallery Events
+- Audit Logs
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Database Configuration
+
+Database connection settings are provided through environment variables.
+
+The Docker Compose database service uses the configured database name, username, and password.
+
+### Connect to PostgreSQL
+
+You can access the database container using:
+
+```bash
+docker compose exec db psql -U your_db_user -d art_gallery_db
+```
+
+Replace the username and database name with the values configured in `.env`.
+
+### Database Schema
+
+The database schema should be maintained using the project's actual SQL schema or database migration files.
+
+If the repository includes initialization scripts, follow the instructions in the `database/` directory.
+
+## 9. API Endpoints
+
+The backend provides REST API endpoints for authentication, dashboard information, user management, rooms, gallery events, and audit logging.
+
+The following are known API examples. Confirm the complete route list against the current backend controllers or OpenAPI documentation before relying on it.
+
+| Method | Endpoint                    | Description                         |
+| ------ | --------------------------- | ----------------------------------- |
+| POST   | `/api/auth/login`           | Authenticate a user                 |
+| POST   | `/api/auth/refresh`         | Refresh authentication credentials  |
+| GET    | `/api/dashboard/room`       | Retrieve room dashboard information |
+| GET    | `/api/dashboard/log`        | Retrieve dashboard activity logs    |
+| GET    | `/api/dashboard/user`       | Retrieve user dashboard information |
+| POST   | `/api/events/gallery/enter` | Record a gallery entry event        |
+
+The `/api/` prefix is handled by Nginx and forwarded to the backend. The backend route itself may not include this prefix.
+
+Additional endpoints for logout, account management, room operations, gallery exit, room entry, and room exit should be documented using the actual controller routes.
+
+### API Authentication
+
+Protected endpoints require valid authentication credentials.
+
+Requests must include the appropriate authentication information, such as a Bearer access token, when required by the endpoint.
+
+Example:
+
+```http
+Authorization: Bearer <access_token>
+```
+
+The required authentication method should be checked for each endpoint.
+
+## 10. Testing
+
+Postman is used to test the application's REST API and security behavior.
+
+### Testing Environment
+
+- Application running through Docker Compose.
+- Backend API accessed through `http://localhost:8080/api`.
+- PostgreSQL running in the Docker network.
+- Postman used to send requests and inspect responses.
+
+### Security Testing Areas
+
+| Test Area        | Testing Objective                                                 |
+| ---------------- | ----------------------------------------------------------------- |
+| Authentication   | Verify valid and invalid login attempts.                          |
+| Input Validation | Verify that invalid or missing input is rejected.                 |
+| SQL Injection    | Check whether malicious input can affect database queries.        |
+| Authorization    | Verify that users cannot access administrator-only resources.     |
+| Token Security   | Test missing, invalid, and expired authentication tokens.         |
+| Room Validation  | Verify that invalid room data is rejected.                        |
+| Business Logic   | Verify that gallery and room events follow the required sequence. |
+| Audit Logging    | Verify that important activities are recorded and protected.      |
+
+### Running Tests with Postman
+
+1. Start the application using Docker Compose.
+2. Open Postman.
+3. Import the project's Postman collection.
+4. Configure the `baseURL` environment variable as:
+
+    ```text
+    http://localhost:8080/api
+    ```
+
+5. Run the login request to obtain authentication credentials.
+6. Save the access token in the Postman environment when the login response provides it.
+7. Execute the test requests.
+8. Record the HTTP status code and actual response.
+9. Save screenshots as testing evidence.
+
+Test results should be recorded as Pass, Fail, Blocked, or Not Tested based on actual execution.
+
+## 11. Security Controls
+
+The application is designed to address the following security requirements:
+
+**Authentication**
+
+- Validate user credentials.
+- Use secure password storage.
+- Manage access and refresh tokens.
+
+**Authorization**
+
+- Enforce role-based access control.
+- Protect administrator-only operations.
+- Validate permissions on the backend.
+
+**Input Validation**
+
+- Validate incoming request data.
+- Reject invalid or unexpected values.
+- Use DTO validation in the backend.
+
+**SQL Injection Prevention**
+
+- Use safe database query practices.
+- Validate input before database operations.
+- Avoid constructing SQL queries directly from untrusted input.
+
+**Session and Token Security**
+
+- Validate authentication tokens.
+- Enforce token expiration.
+- Manage session refresh and logout behavior.
+
+**Audit Logging**
+
+- Record important application and security activities.
+- Use the C++ audit component for append and read operations.
+- Restrict audit log access to authorized administrators.
+- Avoid recording passwords, OTP values, and authentication tokens.
+
+**Error Handling**
+
+- Return appropriate error responses.
+- Avoid exposing sensitive internal implementation details.
+
+**Secrets Management**
+
+- Store sensitive configuration in environment variables.
+- Exclude real credentials and secrets from source control.
+
+## 12. Known Limitations
+
+The following items should be reviewed and updated based on the final implementation and testing results:
+
+- Security testing coverage depends on the test cases that have actually been executed.
+- API endpoint documentation must be kept synchronized with the backend controllers.
+- Email delivery in the development environment may use Mailtrap sandbox rather than a production email service.
+- Deployment configuration is currently intended for a Docker-based development environment.
+- Security controls should be verified through code review and reproducible security tests.
+- Any unresolved vulnerabilities or incomplete features should be documented before final submission.
+
+## 13. Repository Structure
+
+The repository is organized to separate application code, database resources, tests, and documentation.
+
+```text
+secure-art-gallery/
+│
+├── src/
+│   ├── backend/
+│   └── frontend/
+│
+├── database/
+│   ├── schema.sql
+│   └── seed.sql
+│
+├── tests/
+│   ├── functional/
+│   └── security/
+│
+├── docs/
+│   └── design_document.pdf
+│
+├── docker-compose.yml
+├── README.md
+└── .gitignore
+```
+
+The structure above represents the required organization. Adjust directory names to match the actual repository.
+
+## 14. Documentation
+
+Additional project documentation may include:
+
+- System Architecture Diagram
+- Entity-Relationship Diagram (ERD)
+- Data Flow Diagram (DFD)
+- STRIDE Threat Model
+- Security Requirements
+- Security Test Results and Evidence
+
+Refer to the `docs/` directory for the project's design and security documentation.
+
+## 15. License
+
+This project was developed for the CS 4/53401 – Secure Programming BIBIFI Project at Kent State University.
