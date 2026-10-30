@@ -16,10 +16,9 @@ The project follows the Build It, Break It, Fix It (BIBIFI) approach:
 
 ## 2. Team Members
 
-| Name            | Role      |
-| --------------- | --------- |
-| [Team Member 1] | Developer |
-| [Team Member 2] | Developer |
+| Name           | Role      |
+| -------------- | --------- |
+| Minh Hieu Dang | Developer |
 
 ## 3. Technology Stack
 
