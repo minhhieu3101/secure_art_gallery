@@ -383,30 +383,49 @@ The following items should be reviewed and updated based on the final implementa
 
 ## 13. Repository Structure
 
-The repository is organized to separate application code, database resources, tests, and documentation.
+The project is organized into separate directories for the frontend, backend, security testing, and automated tests.
 
 ```text
-secure-art-gallery/
+SECURE-ART-GALLERY/
 │
-├── src/
-│   ├── backend/
-│   └── frontend/
+├── .vscode/                  # Visual Studio Code configuration
+├── dist/                     # Compiled backend output
+├── frontend/                 # React frontend application
+├── node_modules/             # Backend dependencies
+├── security-testing/         # Security testing resources and evidence
+├── src/                      # NestJS backend source code
+├── test/                     # Automated backend tests
 │
-├── database/
-│   ├── schema.sql
-│   └── seed.sql
-│
-├── tests/
-│   ├── functional/
-│   └── security/
-│
-├── docs/
-│   └── design_document.pdf
-│
-├── docker-compose.yml
-├── README.md
-└── .gitignore
+├── .dockerignore             # Docker build exclusions
+├── .env                      # Local environment configuration (not committed)
+├── .env.example              # Example environment configuration
+├── .gitignore                # Git ignored files
+├── compose.yaml              # Docker Compose configuration
+├── Dockerfile                # Backend Docker build configuration
+├── jest.config.ts            # Jest testing configuration
+├── nest-cli.json             # NestJS CLI configuration
+├── package.json              # Backend dependencies and scripts
+├── package-lock.json         # Dependency lock file
+├── README.md                 # Project documentation
+├── tsconfig.build.json       # TypeScript build configuration
+└── tsconfig.json             # TypeScript configuration
 ```
+
+### Main Directories
+
+- **frontend/**: Contains the React-based user interface.
+- **src/**: Contains the NestJS backend, API controllers, services, entities, and application logic.
+- **security-testing/**: Contains Postman security testing resources, test results, and evidence.
+- **test/**: Contains automated tests configured with Jest.
+- **dist/**: Contains compiled backend files generated during the build process.
+
+### Configuration Files
+
+- **compose.yaml**: Defines the Docker Compose services used to run the application.
+- **Dockerfile**: Defines the backend container build process.
+- **.env.example**: Provides an example of the environment variables required by the application.
+- **package.json**: Defines backend dependencies and available scripts.
+- **jest.config.ts**: Configures the Jest testing framework.
 
 The structure above represents the required organization. Adjust directory names to match the actual repository.
 
