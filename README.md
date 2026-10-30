@@ -32,6 +32,7 @@ The project follows the Build It, Break It, Fix It (BIBIFI) approach:
 | Authentication             | JWT and session management  |
 | Email Testing              | Mailtrap SMTP               |
 | Containerization           | Docker, Docker Compose      |
+| API Documentation          | Swagger / OpenAPI           |
 | API Testing                | Postman                     |
 | Web Server / Reverse Proxy | Nginx                       |
 
@@ -42,24 +43,24 @@ The application uses a client-server architecture.
 ### Architecture Overview
 
 ```text
-              User / Browser
-                    |
-                    v
-           React Frontend
-                    |
-                    v
-              Nginx Server
-                    |
-             /api/ requests
-                    |
-                    v
-            NestJS Backend
-              /         \
-             v           v
-       PostgreSQL    C++ Audit
-        Database     Component
-                         |
-                    Audit Records
+             User / Browser
+                   |
+                   v
+          React Frontend
+                   |
+                   v
+             Nginx Server
+                   |
+            /api/ requests
+                   |
+                   v
+           NestJS Backend
+             /         \
+            v           v
+      PostgreSQL    C++ Audit
+       Database     Component
+                        |
+                   Audit Records
 ```
 
 ### Main Components
@@ -137,7 +138,7 @@ Replace `<repository-url>` with the actual GitHub repository URL.
 
 ### Step 2: Configure Environment Variables
 
-Create a `.env` file in the project root or in the location expected by `docker-compose.yml`.
+Create a `.env` file in the project root or in the location expected by `compose.yaml`.
 
 Example configuration:
 
@@ -162,6 +163,8 @@ JWT_REFRESH_TOKEN_EXPIRATION_TIME=2d
 ```
 
 Use your own credentials and strong secrets. Do not commit `.env` files or real credentials to GitHub.
+
+The `.env.example` file provides an example of the required environment variables.
 
 ### Step 3: Build and Start the Application
 
@@ -190,18 +193,15 @@ When using the default Docker port configuration:
 | Service     | Address                                         |
 | ----------- | ----------------------------------------------- |
 | Frontend    | http://localhost:8080                           |
+| Swagger UI  | http://localhost:8080/api/api                   |
 | PostgreSQL  | localhost:5432                                  |
 | Backend API | Access through the frontend Nginx `/api/` proxy |
 
-The backend container listens on port `3000` inside the Docker network. It is not necessarily exposed directly to the host.
+The backend container listens on port `3000` inside the Docker network. It is accessed through the Nginx reverse proxy.
 
 ### Stop the Application
 
-```bash
-docker compose down
-```
-
-To stop the application and remove its containers and networks:
+To stop the containers:
 
 ```bash
 docker compose down
@@ -213,13 +213,13 @@ Database data may be stored in a Docker volume. Do not remove volumes unless you
 
 The application uses PostgreSQL 16 as its relational database.
 
-The database stores:
+The database contains the following main tables:
 
-- Users
-- Sessions
-- Rooms
-- Gallery Events
-- Audit Logs
+- `user`
+- `session`
+- `room`
+- `gallery_event`
+- `audit_logs`
 
 ### Database Configuration
 
@@ -239,15 +239,21 @@ Replace the username and database name with the values configured in `.env`.
 
 ### Database Schema
 
-The database schema should be maintained using the project's actual SQL schema or database migration files.
+The database schema is maintained in:
 
-If the repository includes initialization scripts, follow the instructions in the `database/` directory.
+```text
+database/schema.sql
+```
+
+This file contains the SQL schema used to describe the database structure, including tables, columns, and relationships.
+
+Use the schema file as a reference when setting up or reviewing the database.
 
 ## 9. API Endpoints
 
 The backend provides REST API endpoints for authentication, dashboard information, user management, rooms, gallery events, and audit logging.
 
-The following are known API examples. Confirm the complete route list against the current backend controllers or OpenAPI documentation before relying on it.
+The following are known API examples:
 
 | Method | Endpoint                    | Description                         |
 | ------ | --------------------------- | ----------------------------------- |
@@ -262,11 +268,62 @@ The `/api/` prefix is handled by Nginx and forwarded to the backend. The backend
 
 Additional endpoints for logout, account management, room operations, gallery exit, room entry, and room exit should be documented using the actual controller routes.
 
+### 9.1 API Documentation with Swagger
+
+The project uses Swagger (OpenAPI), integrated with NestJS, to provide interactive API documentation.
+
+Swagger UI allows developers and testers to explore available API endpoints, review request and response formats, and execute API requests directly from a web browser.
+
+#### Accessing Swagger UI
+
+1. Start the application using Docker Compose:
+
+    ```bash
+    docker compose up --build -d
+    ```
+
+2. Open a web browser.
+3. Navigate to the Swagger UI URL:
+
+    ```text
+    http://localhost:8080/api/api
+    ```
+
+The Swagger path is configured in the NestJS application using `SwaggerModule.setup('api', app, document)`. Nginx forwards requests under `/api/` to the backend.
+
+#### Using Swagger UI
+
+1. **Explore API Groups:** Expand the available API tags to view endpoints organized by functionality.
+2. **View Endpoint Details:** Select an endpoint to review its HTTP method, URL, description, parameters, and request body.
+3. **Review Request and Response:** Check the expected input format, response structure, and documented HTTP status codes.
+4. **Authorize:** For protected endpoints, click the **Authorize** button and provide a valid access token.
+5. **Execute API Requests:** Click **Try it out**, enter the required parameters or request body, and click **Execute**.
+6. **Review Results:** Swagger displays the request URL, HTTP response status, response body, and other available response information.
+
+#### Authentication
+
+The application configures Bearer authentication in Swagger.
+
+For protected endpoints, click **Authorize** and enter a valid access token.
+
+```text
+Bearer <access_token>
+```
+
+Access permissions are enforced by the backend according to the user's role.
+
+#### Notes
+
+- Swagger documentation is generated from NestJS controllers, DTOs, and Swagger decorators.
+- Available endpoints and their documentation depend on the metadata defined in the source code.
+- Protected endpoints should be marked with the appropriate Swagger authentication decorators.
+- Swagger is intended for API exploration and functional testing. Postman and security test cases are also used for security verification.
+
 ### API Authentication
 
 Protected endpoints require valid authentication credentials.
 
-Requests must include the appropriate authentication information, such as a Bearer access token, when required by the endpoint.
+Requests may include authentication information, such as a Bearer access token, when required by the endpoint.
 
 Example:
 
@@ -280,12 +337,15 @@ The required authentication method should be checked for each endpoint.
 
 Postman is used to test the application's REST API and security behavior.
 
+Swagger UI is also available for exploring and executing API requests.
+
 ### Testing Environment
 
 - Application running through Docker Compose.
 - Backend API accessed through `http://localhost:8080/api`.
 - PostgreSQL running in the Docker network.
 - Postman used to send requests and inspect responses.
+- Swagger UI used to explore and test documented API endpoints.
 
 ### Security Testing Areas
 
@@ -323,49 +383,49 @@ Test results should be recorded as Pass, Fail, Blocked, or Not Tested based on a
 
 The application is designed to address the following security requirements:
 
-**Authentication**
+### Authentication
 
 - Validate user credentials.
 - Use secure password storage.
 - Manage access and refresh tokens.
 
-**Authorization**
+### Authorization
 
 - Enforce role-based access control.
 - Protect administrator-only operations.
 - Validate permissions on the backend.
 
-**Input Validation**
+### Input Validation
 
 - Validate incoming request data.
 - Reject invalid or unexpected values.
 - Use DTO validation in the backend.
 
-**SQL Injection Prevention**
+### SQL Injection Prevention
 
 - Use safe database query practices.
 - Validate input before database operations.
 - Avoid constructing SQL queries directly from untrusted input.
 
-**Session and Token Security**
+### Session and Token Security
 
 - Validate authentication tokens.
 - Enforce token expiration.
 - Manage session refresh and logout behavior.
 
-**Audit Logging**
+### Audit Logging
 
 - Record important application and security activities.
 - Use the C++ audit component for append and read operations.
 - Restrict audit log access to authorized administrators.
 - Avoid recording passwords, OTP values, and authentication tokens.
 
-**Error Handling**
+### Error Handling
 
 - Return appropriate error responses.
 - Avoid exposing sensitive internal implementation details.
 
-**Secrets Management**
+### Secrets Management
 
 - Store sensitive configuration in environment variables.
 - Exclude real credentials and secrets from source control.
@@ -375,7 +435,7 @@ The application is designed to address the following security requirements:
 The following items should be reviewed and updated based on the final implementation and testing results:
 
 - Security testing coverage depends on the test cases that have actually been executed.
-- API endpoint documentation must be kept synchronized with the backend controllers.
+- API endpoint documentation must be kept synchronized with the backend controllers and Swagger metadata.
 - Email delivery in the development environment may use Mailtrap sandbox rather than a production email service.
 - Deployment configuration is currently intended for a Docker-based development environment.
 - Security controls should be verified through code review and reproducible security tests.
@@ -383,18 +443,18 @@ The following items should be reviewed and updated based on the final implementa
 
 ## 13. Repository Structure
 
-The project is organized into separate directories for the frontend, backend, security testing, and automated tests.
+The project is organized into separate directories for the frontend, backend, database schema, security testing, and automated tests.
 
 ```text
 SECURE-ART-GALLERY/
 │
 ├── .vscode/                  # Visual Studio Code configuration
-├── dist/                     # Compiled backend output
 ├── frontend/                 # React frontend application
-├── node_modules/             # Backend dependencies
 ├── security-testing/         # Security testing resources and evidence
 ├── src/                      # NestJS backend source code
 ├── test/                     # Automated backend tests
+├── database/                 # Database schema
+│   └── schema.sql
 │
 ├── .dockerignore             # Docker build exclusions
 ├── .env                      # Local environment configuration (not committed)
@@ -415,9 +475,9 @@ SECURE-ART-GALLERY/
 
 - **frontend/**: Contains the React-based user interface.
 - **src/**: Contains the NestJS backend, API controllers, services, entities, and application logic.
+- **database/**: Contains the SQL database schema.
 - **security-testing/**: Contains Postman security testing resources, test results, and evidence.
 - **test/**: Contains automated tests configured with Jest.
-- **dist/**: Contains compiled backend files generated during the build process.
 
 ### Configuration Files
 
@@ -427,11 +487,9 @@ SECURE-ART-GALLERY/
 - **package.json**: Defines backend dependencies and available scripts.
 - **jest.config.ts**: Configures the Jest testing framework.
 
-The structure above represents the required organization. Adjust directory names to match the actual repository.
+## 14. Additional Documentation
 
-## 14. Documentation
-
-Additional project documentation may include:
+Additional project documentation includes:
 
 - System Architecture Diagram
 - Entity-Relationship Diagram (ERD)
@@ -439,8 +497,9 @@ Additional project documentation may include:
 - STRIDE Threat Model
 - Security Requirements
 - Security Test Results and Evidence
+- Swagger API Documentation
 
-Refer to the `docs/` directory for the project's design and security documentation.
+Refer to the `docs/` directory and Swagger UI for the corresponding project documentation, where available.
 
 ## 15. License
 
